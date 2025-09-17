@@ -1,4 +1,4 @@
-# gamemaster_hub
+# gameMaster_hub
 
 A new Flutter project.
 

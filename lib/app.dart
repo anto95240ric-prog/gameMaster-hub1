@@ -8,7 +8,7 @@ class GameMasterHubApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: router,
+      routerConfig: AppRouter.router,
       title: 'GameMaster Hub',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

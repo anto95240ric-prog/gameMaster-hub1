@@ -50,7 +50,8 @@ windows/flutter/generated_plugin_registrant.h
 windows/flutter/generated_plugins.cmake
 windows/flutter/ephemeral/
 
-
 # Desktop (si non utilisé)
 macos
 linux
+
+*/.env

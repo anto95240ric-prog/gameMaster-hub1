@@ -17,7 +17,7 @@ void main() async {
   // await HiveConfig.init();
   
   // Initialize Supabase
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: "asstes/.env");
 
   // Initialiser Supabase avec les valeurs du .env
   await Supabase.initialize(

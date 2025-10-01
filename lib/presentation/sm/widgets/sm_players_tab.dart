@@ -13,105 +13,42 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
 
   final List<Map<String, dynamic>> players = [
     {
-      'name': 'Anderson',
-      'position': 'ATT',
-      'age': 24,
-      'nationality': '🇧🇷 Brésil',
-      'rating': 89,
-      'value': '€12.5M',
-      'progression': 3,
-      'stats': {
-        'Vitesse': 88,
-        'Tir': 92,
-        'Passes': 76,
-        'Défense': 34,
-        'Physique': 85,
-        'Mental': 79,
-      },
-    },
-    {
-      'name': 'Rodriguez',
-      'position': 'ATT',
-      'age': 22,
-      'nationality': '🇪🇸 Espagne',
-      'rating': 86,
-      'value': '€8.2M',
-      'progression': 5,
-      'stats': {
-        'Vitesse': 91,
-        'Tir': 87,
-        'Passes': 82,
-        'Défense': 28,
-        'Physique': 78,
-        'Mental': 74,
-      },
-    },
-    {
-      'name': 'Garcia',
-      'position': 'MIL',
-      'age': 26,
-      'nationality': '🇫🇷 France',
-      'rating': 82,
-      'value': '€5.1M',
-      'progression': 0,
-      'stats': {
-        'Vitesse': 75,
-        'Tir': 68,
-        'Passes': 89,
-        'Défense': 76,
-        'Physique': 82,
-        'Mental': 85,
-      },
-    },
-    {
-      'name': 'Silva',
-      'position': 'DEF',
-      'age': 28,
-      'nationality': '🇵🇹 Portugal',
-      'rating': 84,
-      'value': '€15M',
-      'progression': 2,
-      'stats': {
-        'Vitesse': 72,
-        'Tir': 45,
-        'Passes': 84,
-        'Défense': 92,
-        'Physique': 88,
-        'Mental': 90,
-      },
-    },
-    {
-      'name': 'Martinez',
-      'position': 'DEF',
+      'name': 'Vitinha',
+      'position': ['MDC', 'MC', 'MOC'],
       'age': 25,
-      'nationality': '🇦🇷 Argentine',
-      'rating': 81,
-      'value': '€12M',
-      'progression': 4,
+      'rating': 91,
+      'potentiel': 94,
+      'value': '€70M',
+      'status': 'Titulaire',
       'stats': {
-        'Vitesse': 78,
-        'Tir': 42,
-        'Passes': 79,
-        'Défense': 89,
-        'Physique': 91,
-        'Mental': 83,
-      },
-    },
-    {
-      'name': 'Wilson',
-      'position': 'MIL',
-      'age': 27,
-      'nationality': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre',
-      'rating': 83,
-      'value': '€18M',
-      'progression': 1,
-      'stats': {
-        'Vitesse': 81,
-        'Tir': 74,
-        'Passes': 87,
-        'Défense': 69,
-        'Physique': 84,
-        'Mental': 88,
+          //Technique 
+          'marquage': 70,
+          'deplacement': 82,
+          'frappes Lointaines': 82,
+          'passesLongues': 85,
+          'coupsFrancs': 70,
+          'tacles': 70,
+          'finition': 75,
+          'centres': 75,
+          'passes': 95,
+          'corners': 75,
+          'positionnement': 82,
+          'dribble': 95,
+          'controle': 88,
+          'penalties': 65,
+          'creativite': 81,
+          // Physique
+          'stabilite Aerienne': 64,
+          'vitesse': 95,
+          'endurance': 88,
+          'force': 65,
+          'distance Parcourue': 76,
+          //Mental
+          'agressivite': 65,
+          'sangFroid': 95,
+          'concentration': 82,
+          'flair': 81,
+          'leadership': 85,
       },
     },
   ];
@@ -159,7 +96,6 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
     );
   }
 
-
   Widget _buildFilters(BuildContext context) {
     return Row(
       children: [
@@ -205,7 +141,8 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
   Widget _buildPlayersGrid(BuildContext context) {
     final filteredPlayers = players.where((player) {
       final matchesPosition = selectedPosition == 'Tous les postes' ||
-          player['position'].toString().contains(_getPositionFilter(selectedPosition));
+          _getPositionFilter(selectedPosition)
+              .any((pos) => (player['position'] as List<String>).contains(pos));
       final matchesSearch = searchQuery.isEmpty ||
           player['name'].toString().toLowerCase().contains(searchQuery.toLowerCase());
       return matchesPosition && matchesSearch;
@@ -213,10 +150,10 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
 
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 300, // largeur max par carte
+        maxCrossAxisExtent: 315, // largeur max par carte
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 1.2,
+        childAspectRatio: 2.5,
       ),
       itemCount: filteredPlayers.length,
       itemBuilder: (context, index) {
@@ -226,18 +163,18 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
     );
   }
 
-  String _getPositionFilter(String position) {
+  List<String> _getPositionFilter(String position) {
     switch (position) {
       case 'Gardien':
-        return 'GK';
+        return ['GK'];
       case 'Défenseur':
-        return 'DEF';
+        return ['DC', 'DG', 'DD', 'DOG', 'DOD']; // tous les postes de défense
       case 'Milieu':
-        return 'MIL';
+        return ['MC', 'MDC', 'MOC', 'MD', 'MG']; // tous les postes de milieu
       case 'Attaquant':
-        return 'ATT';
+        return ['BU', 'MOD', 'MOG']; // tous les postes d'attaquant si besoin
       default:
-        return '';
+        return [];
     }
   }
 
@@ -273,7 +210,7 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         Text(
-                          '${player['position']} • ${player['age']} ans',
+                          '${(player['position'] as List).join("/")} • \n${player['age']} ans',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -293,35 +230,34 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getRatingColor(player['potentiel']).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      player['potentiel'].toString(),
+                      style: TextStyle(
+                        color: _getRatingColor(player['potentiel']),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                player['nationality'],
-                style: Theme.of(context).textTheme.bodySmall,
               ),
               const Spacer(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
+                    (player['status'] as String?) ?? 'Inconnu',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  Text(
                     player['value'],
                     style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: _getProgressionColor(player['progression']).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      player['progression'] > 0 ? '+${player['progression']}' : '${player['progression']}',
-                      style: TextStyle(
-                        color: _getProgressionColor(player['progression']),
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -338,9 +274,9 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
     return Colors.orange;
   }
 
-  Color _getProgressionColor(int progression) {
-    if (progression > 0) return Colors.green;
-    if (progression < 0) return Colors.red;
+  Color _getProgressionColor(int potentiel) {
+    if (potentiel > 0) return Colors.green;
+    if (potentiel < 0) return Colors.red;
     return Colors.grey;
   }
 
@@ -402,7 +338,7 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  player['nationality'],
+                                  player['status'],
                                   style: Theme.of(context).textTheme.titleMedium,
                                 ),
                                 const SizedBox(height: 8),
@@ -411,13 +347,13 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
-                                        color: _getPositionColor(player['position']).withOpacity(0.2),
+                                        color: _getPositionColor((player['position'] as List<String>).first).withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
-                                        player['position'],
+                                        (player['position'] as List).join("/"),
                                         style: TextStyle(
-                                          color: _getPositionColor(player['position']),
+                                          color: _getPositionColor((player['position'] as List).first), // prends la première pour la couleur
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -443,6 +379,21 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
                                         ),
                                       ),
                                     ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: _getRatingColor(player['potentiel']).withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        player['potentiel'].toString(),
+                                        style: TextStyle(
+                                          color: _getRatingColor(player['potentiel']),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
                                     const SizedBox(width: 12),
                                     Text(player['value']),
                                   ],
@@ -459,34 +410,34 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 16),
-                      ...player['stats'].entries.map<Widget>((entry) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(entry.key),
-                                  Text(
-                                    entry.value.toString(),
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              LinearProgressIndicator(
-                                value: entry.value / 100,
-                                backgroundColor: Theme.of(context).dividerColor,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
+                      // Technique
+                      _buildStatsCard(
+                        context,
+                        "Technique",
+                        _filterStats(player['stats'], [
+                          'marquage', 'deplacement', 'frappes Lointaines', 'passesLongues',
+                          'coupsFrancs', 'tacles', 'finition', 'centres', 'passes', 'corners',
+                          'positionnement', 'dribble', 'controle', 'penalties', 'creativite',
+                        ]),
+                      ),
+                      const SizedBox(height: 16),
+                      // Physique
+                      _buildStatsCard(
+                        context,
+                        "Physique",
+                        _filterStats(player['stats'], [
+                          'stabilite Aerienne', 'vitesse', 'endurance', 'force', 'distance Parcourue',
+                        ]),
+                      ),
+                      const SizedBox(height: 16),
+                      // Mental
+                      _buildStatsCard(
+                        context,
+                        "Mental",
+                        _filterStats(player['stats'], [
+                          'agressivite', 'sangFroid', 'concentration', 'flair', 'leadership',
+                        ]),
+                      ),
                     ],
                   ),
                 ),
@@ -512,19 +463,6 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
                         label: const Text('Modifier'),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${player['name']} titularisé')),
-                          );
-                        },
-                        icon: const Icon(Icons.star),
-                        label: const Text('Titulariser'),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -540,11 +478,88 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
       case 'ATT':
         return Colors.red;
       case 'MIL':
+      case 'MC':
+      case 'MDC':
+      case 'MOC':
         return Colors.green;
       case 'DEF':
+      case 'DC':
+      case 'DL':
+      case 'DR':
         return Colors.blue;
+      case 'GK':
+        return Colors.orange;
       default:
         return Colors.grey;
     }
   }
+
+  Map<String, int> _filterStats(Map<String, int> stats, List<String> keys) {
+    return Map.fromEntries(
+      stats.entries.where((entry) => keys.contains(entry.key)),
+    );
+  }
+
+Widget _buildStatsCard(BuildContext context, String title, Map<String, int> stats) {
+  final entries = stats.entries.toList();
+  
+  return Card(
+    elevation: 2,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          // Table pour 3 stats par ligne
+          Table(
+            columnWidths: const {
+              0: FlexColumnWidth(1),
+              1: FlexColumnWidth(1),
+              2: FlexColumnWidth(1),
+            },
+            children: List.generate(
+              (entries.length / 3).ceil(),
+              (rowIndex) {
+                final start = rowIndex * 3;
+                final end = (start + 3).clamp(0, entries.length);
+                final rowEntries = entries.sublist(start, end);
+                return TableRow(
+                  children: List.generate(3, (colIndex) {
+                    if (colIndex < rowEntries.length) {
+                      final entry = rowEntries[colIndex];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Column(
+                          children: [
+                            Text(
+                              entry.key,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              entry.value.toString(),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      // Case vide pour compléter la ligne si moins de 3 stats
+                      return const SizedBox();
+                    }
+                  }),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 }

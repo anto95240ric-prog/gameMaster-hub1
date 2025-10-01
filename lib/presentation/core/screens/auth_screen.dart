@@ -37,7 +37,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
-          context.go('/home');
+          context.go('/');
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -89,9 +89,12 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 16),
-            Text(
-              'GameMaster Hub',
-              style: Theme.of(context).textTheme.displayMedium,
+            Expanded(
+              child: Text(
+                'GameMaster Hub',
+                style: Theme.of(context).textTheme.displayMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -104,7 +107,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       ],
     );
   }
-
   Widget _buildTabBar() {
     return Container(
       decoration: BoxDecoration(
@@ -220,9 +222,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () {
-              // TODO: Implement Google OAuth
-            },
+            onPressed: () {},
             icon: const Icon(Icons.g_mobiledata),
             label: const Text('Google'),
           ),
@@ -230,9 +230,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         const SizedBox(width: 16),
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () {
-              // TODO: Implement GitHub OAuth
-            },
+            onPressed: () {},
             icon: const Icon(Icons.code),
             label: const Text('GitHub'),
           ),
@@ -240,7 +238,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       ],
     );
   }
-
+  
   void _handleSubmit() {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text.trim();

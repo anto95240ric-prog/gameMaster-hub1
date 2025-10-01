@@ -19,9 +19,6 @@ dependencies:
   # Navigation
   go_router: ^12.1.1
   
-  # Local Storage
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
   flutter_dotenv: ^6.0.0
   
   # Network & API
@@ -47,7 +44,6 @@ dev_dependencies:
   
   # Code Generation
   build_runner: ^2.4.7
-  hive_generator: ^2.0.1
   json_serializable: ^6.7.1
   
   # Linting
@@ -56,15 +52,15 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   
-  assets:
+  # assets:
   #   - assets/images/
   #   - assets/icons/
-      - assets/.env
+      # - .env
   fonts:
     - family: Orbitron
       fonts:
-        - asset: assets/fonts/static/Orbitron-Regular.ttf
-        - asset: assets/fonts/static/Orbitron-Bold.ttf
+        - asset: assets/fonts/Orbitron-Regular.ttf
+        - asset: assets/fonts/Orbitron-Bold.ttf
           weight: 700
-        - asset: assets/fonts/static/Orbitron-Black.ttf
+        - asset: assets/fonts/Orbitron-Black.ttf
           weight: 900

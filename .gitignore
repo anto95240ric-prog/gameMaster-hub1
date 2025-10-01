@@ -54,4 +54,4 @@ windows/flutter/ephemeral/
 macos
 linux
 
-*/.env
+.env

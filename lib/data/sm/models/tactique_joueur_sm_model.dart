@@ -1,0 +1,28 @@
+import 'package:gamemaster_hub/domain/sm/entities/tactique_joueur_sm.dart';
+
+class TactiqueJoueurSmModel extends TactiqueJoueurSm {
+  TactiqueJoueurSmModel({
+    required super.id,
+    required super.tactiqueId,
+    required super.joueurId,
+    super.roleId,
+  });
+
+  factory TactiqueJoueurSmModel.fromMap(Map<String, dynamic> map) {
+    return TactiqueJoueurSmModel(
+      id: map['id'],
+      tactiqueId: map['tactique_id'],
+      joueurId: map['joueur_id'],
+      roleId: map['role_id'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'tactique_id': tactiqueId,
+      'joueur_id': joueurId,
+      'role_id': roleId,
+    };
+  }
+}

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../blocs/auth/auth_bloc.dart';
-// import '../blocs/theme/theme_bloc.dart';
+import '../blocs/theme/theme_bloc.dart';
 import '../widgets/game_card.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -24,25 +24,16 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          // IconButton(
-          //   onPressed: () {
-          //     context.read<ThemeBloc>().add(ToggleTheme());
-          //   },
-          //   icon: BlocBuilder<ThemeBloc, ThemeState>(
-          //     builder: (context, state) {
-          //       return Icon(
-          //         state.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-          //       );
-          //     },
-          //   ),
-          // ),
           IconButton(
             onPressed: () {
-              // TODO: Show notifications
+              context.read<ThemeBloc>().add(ToggleTheme());
             },
-            icon: const Badge(
-              label: Text('3'),
-              child: Icon(Icons.notifications),
+            icon: BlocBuilder<ThemeBloc, ThemeState>(
+              builder: (context, state) {
+                return Icon(
+                  state.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                );
+              },
             ),
           ),
           IconButton(

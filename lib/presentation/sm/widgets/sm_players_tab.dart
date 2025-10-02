@@ -208,7 +208,10 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                     // Nom
                     TextFormField(
                       decoration: const InputDecoration(labelText: "Nom"),
-                      validator: (value) => value == null || value.isEmpty ? "Champ obligatoire" : null,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return "Nom obligatoire";
+                        return null;
+                      },
                       onSaved: (value) => nom = value!,
                     ),
                     const SizedBox(height: 12),
@@ -218,6 +221,12 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                       decoration: const InputDecoration(labelText: "Âge"),
                       keyboardType: TextInputType.number,
                       initialValue: "18",
+                      validator: (value) {
+                        final v = int.tryParse(value ?? '');
+                        if (v == null) return "Doit être un nombre";
+                        if (v < 16) return "L'âge doit être ≥ 16";
+                        return null;
+                      },
                       onSaved: (value) => age = int.tryParse(value ?? "18") ?? 18,
                     ),
                     const SizedBox(height: 12),
@@ -263,6 +272,10 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                       onConfirm: (values) {
                         postesSelectionnes = values;
                       },
+                      validator: (values) {
+                        if (values == null || values.isEmpty) return "Sélectionner au moins un poste";
+                        return null;
+                      },
                     ),
 
                     // Niveau actuel
@@ -270,6 +283,12 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                       decoration: const InputDecoration(labelText: "Niveau actuel"),
                       keyboardType: TextInputType.number,
                       initialValue: "60",
+                      validator: (value) {
+                        final v = int.tryParse(value ?? '');
+                        if (v == null) return "Doit être un nombre";
+                        if (v < 0 || v > 100) return "Doit être entre 0 et 100";
+                        return null;
+                      },
                       onSaved: (value) => niveauActuel = int.tryParse(value ?? "60") ?? 60,
                     ),
                     const SizedBox(height: 12),
@@ -279,6 +298,12 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                       decoration: const InputDecoration(labelText: "Potentiel"),
                       keyboardType: TextInputType.number,
                       initialValue: "80",
+                      validator: (value) {
+                        final v = int.tryParse(value ?? '');
+                        if (v == null) return "Doit être un nombre";
+                        if (v < 0 || v > 100) return "Doit être entre 0 et 100";
+                        return null;
+                      },
                       onSaved: (value) => potentiel = int.tryParse(value ?? "80") ?? 80,
                     ),
                     const SizedBox(height: 12),

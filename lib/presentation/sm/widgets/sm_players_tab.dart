@@ -42,7 +42,7 @@ class SMPlayersTabState extends State<SMPlayersTab> {
           age: row['age'],
           postes: (row['postes'] as List<dynamic>)
               .map((p) => PosteEnum.values.firstWhere((e) => e.name == p))
-              .toList(), // ✅ conversion tableau texte → liste PosteEnum
+              .toList(),
           niveauActuel: row['niveau_actuel'],
           potentiel: row['potentiel'],
           montantTransfert: row['montant_transfert'],
@@ -90,11 +90,12 @@ class SMPlayersTabState extends State<SMPlayersTab> {
 
         return {
           'name': joueur.nom,
-          'position': joueur.postes.map((e) => e.name).toList(), // ✅ plusieurs postes
+          'position': joueur.postes.map((e) => e.name).toList(),
           'age': joueur.age,
           'rating': joueur.niveauActuel,
           'potentiel': joueur.potentiel,
           'value': '€${joueur.montantTransfert}M',
+          'duree_contrat': joueur.dureeContrat.toString(),
           'status': joueur.status.name,
           'stats': stats != null
               ? {
@@ -156,9 +157,8 @@ class SMPlayersTabState extends State<SMPlayersTab> {
   Widget _buildHeader(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Définir la taille de la police en fonction de la largeur de l'écran
     final titleStyle = Theme.of(context).textTheme.displayMedium?.copyWith(
-      fontSize: screenWidth < 600 ? 20 : 32, // mobile < 600 → 20, sinon 32
+      fontSize: screenWidth < 600 ? 20 : 32,
     );
 
     return Row(
@@ -185,7 +185,7 @@ class SMPlayersTabState extends State<SMPlayersTab> {
     int potentiel = 80;
     int montantTransfert = 1000000;
     StatusEnum status = StatusEnum.Titulaire;
-    int dureeContrat = 3;
+    int dureeContrat = 2028;
     int salaire = 10000;
     List<PosteEnum> postesSelectionnes = [];
 
@@ -231,7 +231,7 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                     ),
                     const SizedBox(height: 12),
 
-                    // ✅ MultiSelect pour plusieurs postes
+                    // MultiSelect pour plusieurs postes
                    MultiSelectDialogField<PosteEnum>(
                       items: PosteEnum.values
                           .map((p) => MultiSelectItem<PosteEnum>(p, p.name))
@@ -307,6 +307,15 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                       onSaved: (value) => potentiel = int.tryParse(value ?? "80") ?? 80,
                     ),
                     const SizedBox(height: 12),
+                    
+                    // Duree contrat
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: "Fin de contrat"),
+                      keyboardType: TextInputType.number,
+                      initialValue: "2028",
+                      onSaved: (value) => dureeContrat = int.tryParse(value ?? "2028") ?? 2028,
+                    ),
+                    const SizedBox(height: 12),
 
                     // Salaire
                     TextFormField(
@@ -328,6 +337,7 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                     ),
                     const SizedBox(height: 16),
 
+                    // btn action (annuler, ajouter )
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -341,7 +351,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                             if (_formKey.currentState!.validate()) {
                               _formKey.currentState!.save();
 
-                              // ✅ insertion dans Supabase avec plusieurs postes
                               final response = await Supabase.instance.client
                                 .from('joueur_sm')
                                 .insert({
@@ -368,7 +377,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
 
                               final userId = Supabase.instance.client.auth.currentUser!.id;
 
-                              // insérer des stats par défaut
                               await Supabase.instance.client.from('stats_joueur_sm').insert({
                                 'user_id': userId,
                                 'joueur_id': joueurId,
@@ -401,7 +409,7 @@ class SMPlayersTabState extends State<SMPlayersTab> {
 
                               if (mounted) {
                                 Navigator.pop(context);
-                                fetchPlayers(); // rafraîchit la liste
+                                fetchPlayers();
                               }
                             }
                           },
@@ -491,11 +499,11 @@ class SMPlayersTabState extends State<SMPlayersTab> {
       case 'Gardien':
         return ['GK'];
       case 'Défenseur':
-        return ['DC', 'DG', 'DD', 'DOG', 'DOD']; // tous les postes de défense
+        return ['DC', 'DG', 'DD', 'DOG', 'DOD'];
       case 'Milieu':
-        return ['MC', 'MDC', 'MOC', 'MD', 'MG']; // tous les postes de milieu
+        return ['MC', 'MDC', 'MOC', 'MD', 'MG'];
       case 'Attaquant':
-        return ['BU', 'MOD', 'MOG']; // tous les postes d'attaquant si besoin
+        return ['BU', 'MOD', 'MOG'];
       default:
         return [];
     }
@@ -533,7 +541,7 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         Text(
-                          '${(player['position'] as List).join("/")} • \n${player['age']} ans',
+                          '${(player['position'] as List).join("/")} • \n${player['age']} ans • ${player['duree_contrat']}',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -662,6 +670,10 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                               children: [
                                 Text(
                                   player['status'],
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                Text(
+                                  "Contrat jusqu'à ${player['duree_contrat']}",
                                   style: Theme.of(context).textTheme.titleMedium,
                                 ),
                                 const SizedBox(height: 8),
@@ -884,5 +896,4 @@ class SMPlayersTabState extends State<SMPlayersTab> {
       ),
     );
   }
-
 }

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gamemaster_hub/domain/sm/entities/joueur_sm.dart';
+import 'package:gamemaster_hub/domain/sm/entities/stats_joueur_sm.dart';
+import 'package:gamemaster_hub/domain/common/enums.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class SMPlayersTab extends StatefulWidget {
   const SMPlayersTab({super.key});
@@ -11,50 +16,168 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
   String selectedPosition = 'Tous les postes';
   String searchQuery = '';
 
-  final List<Map<String, dynamic>> players = [
-    {
-      'name': 'Vitinha',
-      'position': ['MDC', 'MC', 'MOC'],
-      'age': 25,
-      'rating': 91,
-      'potentiel': 94,
-      'value': '€70M',
-      'status': 'Titulaire',
-      'stats': {
-          //Technique 
-          'marquage': 70,
-          'deplacement': 82,
-          'frappes Lointaines': 82,
-          'passesLongues': 85,
-          'coupsFrancs': 70,
-          'tacles': 70,
-          'finition': 75,
-          'centres': 75,
-          'passes': 95,
-          'corners': 75,
-          'positionnement': 82,
-          'dribble': 95,
-          'controle': 88,
-          'penalties': 65,
-          'creativite': 81,
-          // Physique
-          'stabilite Aerienne': 64,
-          'vitesse': 95,
-          'endurance': 88,
-          'force': 65,
-          'distance Parcourue': 76,
-          //Mental
-          'agressivite': 65,
-          'sangFroid': 95,
-          'concentration': 82,
-          'flair': 81,
-          'leadership': 85,
-      },
-    },
-  ];
+  List<Map<String, dynamic>> players = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPlayers();
+  }
+
+  Future<void> _fetchPlayers() async {
+    final response = await Supabase.instance.client
+        .from('joueur_sm')
+        .select('*, stats_joueur_sm(*)');
+
+    final data = response as List<dynamic>;
+
+    setState(() {
+      players = data.map((row) {
+        final joueur = JoueurSm(
+          id: row['id'],
+          nom: row['nom'],
+          age: row['age'],
+          postes: (row['postes'] as List<dynamic>)
+              .map((p) => PosteEnum.values.firstWhere((e) => e.name == p))
+              .toList(), // ✅ conversion tableau texte → liste PosteEnum
+          niveauActuel: row['niveau_actuel'],
+          potentiel: row['potentiel'],
+          montantTransfert: row['montant_transfert'],
+          status: StatusEnum.values.firstWhere((e) => e.name == row['status']),
+          dureeContrat: row['duree_contrat'],
+          salaire: row['salaire'],
+          userId: row['user_id'],
+        );
+
+        final statsRow = (row['stats_joueur_sm'] as List).isNotEmpty
+            ? row['stats_joueur_sm'][0]
+            : null;
+
+        final stats = statsRow != null
+            ? StatsJoueurSm(
+                id: statsRow['id'],
+                joueurId: statsRow['joueurId'],
+                marquage: statsRow['marquage'],
+                deplacement: statsRow['deplacement'],
+                frappesLointaines: statsRow['frappesLointaines'],
+                passesLongues: statsRow['passesLongues'],
+                coupsFrancs: statsRow['coupsFrancs'],
+                tacles: statsRow['tacles'],
+                finition: statsRow['finition'],
+                centres: statsRow['centres'],
+                passes: statsRow['passes'],
+                corners: statsRow['corners'],
+                positionnement: statsRow['positionnement'],
+                dribble: statsRow['dribble'],
+                controle: statsRow['controle'],
+                penalties: statsRow['penalties'],
+                creativite: statsRow['creativite'],
+                stabiliteAerienne: statsRow['stabiliteAerienne'],
+                vitesse: statsRow['vitesse'],
+                endurance: statsRow['endurance'],
+                force: statsRow['force'],
+                distanceParcourue: statsRow['distanceParcourue'],
+                agressivite: statsRow['agressivite'],
+                sangFroid: statsRow['sangFroid'],
+                concentration: statsRow['concentration'],
+                flair: statsRow['flair'],
+                leadership: statsRow['leadership'],
+              )
+            : null;
+
+        return {
+          'name': joueur.nom,
+          'position': joueur.postes.map((e) => e.name).toList(), // ✅ plusieurs postes
+          'age': joueur.age,
+          'rating': joueur.niveauActuel,
+          'potentiel': joueur.potentiel,
+          'value': '€${joueur.montantTransfert}M',
+          'status': joueur.status.name,
+          'stats': stats != null
+              ? {
+                  'marquage': stats.marquage,
+                  'deplacement': stats.deplacement,
+                  'frappes Lointaines': stats.frappesLointaines,
+                  'passesLongues': stats.passesLongues,
+                  'coupsFrancs': stats.coupsFrancs,
+                  'tacles': stats.tacles,
+                  'finition': stats.finition,
+                  'centres': stats.centres,
+                  'passes': stats.passes,
+                  'corners': stats.corners,
+                  'positionnement': stats.positionnement,
+                  'dribble': stats.dribble,
+                  'controle': stats.controle,
+                  'penalties': stats.penalties,
+                  'creativite': stats.creativite,
+                  'stabilite Aerienne': stats.stabiliteAerienne,
+                  'vitesse': stats.vitesse,
+                  'endurance': stats.endurance,
+                  'force': stats.force,
+                  'distance Parcourue': stats.distanceParcourue,
+                  'agressivite': stats.agressivite,
+                  'sangFroid': stats.sangFroid,
+                  'concentration': stats.concentration,
+                  'flair': stats.flair,
+                  'leadership': stats.leadership,
+                }
+              : {},
+        };
+      }).toList();
+
+      isLoading = false;
+    });
+  }
+
+  // final List<Map<String, dynamic>> players = [
+  //   {
+  //     'name': 'Vitinha',
+  //     'position': ['MDC', 'MC', 'MOC'],
+  //     'age': 25,
+  //     'rating': 91,
+  //     'potentiel': 94,
+  //     'value': '€70M',
+  //     'status': 'Titulaire',
+  //     'stats': {
+  //         //Technique 
+  //         'marquage': 70,
+  //         'deplacement': 82,
+  //         'frappes Lointaines': 82,
+  //         'passesLongues': 85,
+  //         'coupsFrancs': 70,
+  //         'tacles': 70,
+  //         'finition': 75,
+  //         'centres': 75,
+  //         'passes': 95,
+  //         'corners': 75,
+  //         'positionnement': 82,
+  //         'dribble': 95,
+  //         'controle': 88,
+  //         'penalties': 65,
+  //         'creativite': 81,
+  //         // Physique
+  //         'stabilite Aerienne': 64,
+  //         'vitesse': 95,
+  //         'endurance': 88,
+  //         'force': 65,
+  //         'distance Parcourue': 76,
+  //         //Mental
+  //         'agressivite': 65,
+  //         'sangFroid': 95,
+  //         'concentration': 82,
+  //         'flair': 81,
+  //         'leadership': 85,
+  //     },
+  //   },
+  // ];
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -86,13 +209,216 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
           style: titleStyle,
         ),
         ElevatedButton.icon(
-          onPressed: () {
-            // TODO: Add player functionality
-          },
+          onPressed: () => _showAddPlayerDialog(context),
           icon: const Icon(Icons.add),
           label: const Text('Ajouter'),
         ),
       ],
+    );
+  }
+
+  void _showAddPlayerDialog(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
+    String nom = '';
+    int age = 18;
+    int niveauActuel = 60;
+    int potentiel = 80;
+    int montantTransfert = 1000000;
+    StatusEnum status = StatusEnum.Titulaire;
+    int dureeContrat = 3;
+    int salaire = 10000;
+    List<PosteEnum> postesSelectionnes = [];
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text("Ajouter un joueur", style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 16),
+
+                    // Nom
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: "Nom"),
+                      validator: (value) => value == null || value.isEmpty ? "Champ obligatoire" : null,
+                      onSaved: (value) => nom = value!,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Âge
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: "Âge"),
+                      keyboardType: TextInputType.number,
+                      initialValue: "18",
+                      onSaved: (value) => age = int.tryParse(value ?? "18") ?? 18,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // ✅ MultiSelect pour plusieurs postes
+                   MultiSelectDialogField<PosteEnum>(
+                      items: PosteEnum.values
+                          .map((p) => MultiSelectItem<PosteEnum>(p, p.name))
+                          .toList(),
+                      title: Text(
+                        "Postes",
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+                      buttonText: Text(
+                        "Choisir les postes",
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+                      itemsTextStyle: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                      confirmText: Text(
+                        "OK",
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      cancelText: Text(
+                        "Annuler",
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      onConfirm: (values) {
+                        postesSelectionnes = values;
+                      },
+                    ),
+
+                    // Niveau actuel
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: "Niveau actuel"),
+                      keyboardType: TextInputType.number,
+                      initialValue: "60",
+                      onSaved: (value) => niveauActuel = int.tryParse(value ?? "60") ?? 60,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Potentiel
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: "Potentiel"),
+                      keyboardType: TextInputType.number,
+                      initialValue: "80",
+                      onSaved: (value) => potentiel = int.tryParse(value ?? "80") ?? 80,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Salaire
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: "Salaire"),
+                      keyboardType: TextInputType.number,
+                      initialValue: "10000",
+                      onSaved: (value) => salaire = int.tryParse(value ?? "10000") ?? 10000,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Statut
+                    DropdownButtonFormField<StatusEnum>(
+                      value: status,
+                      decoration: const InputDecoration(labelText: "Statut"),
+                      items: StatusEnum.values
+                          .map((s) => DropdownMenuItem(value: s, child: Text(s.name)))
+                          .toList(),
+                      onChanged: (value) => status = value!,
+                    ),
+                    const SizedBox(height: 16),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Annuler"),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              _formKey.currentState!.save();
+
+                              // ✅ insertion dans Supabase avec plusieurs postes
+                              final response = await Supabase.instance.client.from('joueur_sm').insert({
+                                'nom': nom,
+                                'age': age,
+                                'postes': postesSelectionnes.map((p) => p.name).toList(), // plusieurs postes
+                                'niveau_actuel': niveauActuel,
+                                'potentiel': potentiel,
+                                'montant_transfert': montantTransfert,
+                                'status': status.name,
+                                'duree_contrat': dureeContrat,
+                                'salaire': salaire,
+                                'user_id': Supabase.instance.client.auth.currentUser!.id,
+                              }).select().single();
+
+                              final joueurId = response['id'];
+
+                              // insérer des stats par défaut
+                              await Supabase.instance.client.from('stats_joueur_sm').insert({
+                                'joueurId': joueurId,
+                                'marquage': 50,
+                                'deplacement': 50,
+                                'frappesLointaines': 50,
+                                'passesLongues': 50,
+                                'coupsFrancs': 50,
+                                'tacles': 50,
+                                'finition': 50,
+                                'centres': 50,
+                                'passes': 50,
+                                'corners': 50,
+                                'positionnement': 50,
+                                'dribble': 50,
+                                'controle': 50,
+                                'penalties': 50,
+                                'creativite': 50,
+                                'stabiliteAerienne': 50,
+                                'vitesse': 50,
+                                'endurance': 50,
+                                'force': 50,
+                                'distanceParcourue': 50,
+                                'agressivite': 50,
+                                'sangFroid': 50,
+                                'concentration': 50,
+                                'flair': 50,
+                                'leadership': 50,
+                              });
+
+                              if (mounted) {
+                                Navigator.pop(context);
+                                _fetchPlayers(); // rafraîchit la liste
+                              }
+                            }
+                          },
+                          child: const Text("Ajouter"),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -500,66 +826,66 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
     );
   }
 
-Widget _buildStatsCard(BuildContext context, String title, Map<String, int> stats) {
-  final entries = stats.entries.toList();
-  
-  return Card(
-    elevation: 2,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 12),
-          // Table pour 3 stats par ligne
-          Table(
-            columnWidths: const {
-              0: FlexColumnWidth(1),
-              1: FlexColumnWidth(1),
-              2: FlexColumnWidth(1),
-            },
-            children: List.generate(
-              (entries.length / 3).ceil(),
-              (rowIndex) {
-                final start = rowIndex * 3;
-                final end = (start + 3).clamp(0, entries.length);
-                final rowEntries = entries.sublist(start, end);
-                return TableRow(
-                  children: List.generate(3, (colIndex) {
-                    if (colIndex < rowEntries.length) {
-                      final entry = rowEntries[colIndex];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          children: [
-                            Text(
-                              entry.key,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              entry.value.toString(),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      );
-                    } else {
-                      // Case vide pour compléter la ligne si moins de 3 stats
-                      return const SizedBox();
-                    }
-                  }),
-                );
+  Widget _buildStatsCard(BuildContext context, String title, Map<String, int> stats) {
+    final entries = stats.entries.toList();
+    
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            // Table pour 3 stats par ligne
+            Table(
+              columnWidths: const {
+                0: FlexColumnWidth(1),
+                1: FlexColumnWidth(1),
+                2: FlexColumnWidth(1),
               },
+              children: List.generate(
+                (entries.length / 3).ceil(),
+                (rowIndex) {
+                  final start = rowIndex * 3;
+                  final end = (start + 3).clamp(0, entries.length);
+                  final rowEntries = entries.sublist(start, end);
+                  return TableRow(
+                    children: List.generate(3, (colIndex) {
+                      if (colIndex < rowEntries.length) {
+                        final entry = rowEntries[colIndex];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Column(
+                            children: [
+                              Text(
+                                entry.key,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                entry.value.toString(),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        // Case vide pour compléter la ligne si moins de 3 stats
+                        return const SizedBox();
+                      }
+                    }),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
 }

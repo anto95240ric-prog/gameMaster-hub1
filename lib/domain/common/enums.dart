@@ -1,22 +1,23 @@
 enum PosteEnum {
   GK,
   DC,
-  DL,
-  DR,
+  DG,
+  DD,
+  DOG,
+  DOD,
+  MDC,
   MC,
-  ML,
-  MR,
+  MG,
+  MD,
   MOC,
   MOD,
   MOG,
-  ST,
+  BU,
 }
 
 enum StatusEnum {
   Titulaire,
   Remplacant,
-  Blesse,
-  Suspendu,
-  EnPret,
-  Transfert,
+  Preter,
+  Vendre,
 }

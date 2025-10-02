@@ -9,6 +9,8 @@ import '../../core/blocs/auth/auth_bloc.dart';
 import '../../core/blocs/theme/theme_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+final GlobalKey<SMPlayersTabState> smPlayersKey = GlobalKey<SMPlayersTabState>();
+
 class SMMainScreen extends StatefulWidget {
   const SMMainScreen({super.key});
 
@@ -62,6 +64,12 @@ class _SMMainScreenState extends State<SMMainScreen>
           ),
           IconButton(
             onPressed: () {
+              smPlayersKey.currentState?.fetchPlayers();
+            },
+            icon: const Icon(Icons.sync),
+          ),
+          IconButton(
+            onPressed: () {
               context.read<AuthBloc>().add(AuthSignOutRequested());
               context.go('/auth');
             },
@@ -92,9 +100,9 @@ class _SMMainScreenState extends State<SMMainScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
+        children: [
           // SMTacticsTab(),
-          SMPlayersTab(),
+          SMPlayersTab(key: smPlayersKey),
           // SMMatchesTab(),
           // SMExportTab(),
         ],

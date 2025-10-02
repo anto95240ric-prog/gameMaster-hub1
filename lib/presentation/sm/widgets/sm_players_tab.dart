@@ -9,10 +9,10 @@ class SMPlayersTab extends StatefulWidget {
   const SMPlayersTab({super.key});
 
   @override
-  State<SMPlayersTab> createState() => _SMPlayersTabState();
+  State<SMPlayersTab> createState() => SMPlayersTabState();
 }
 
-class _SMPlayersTabState extends State<SMPlayersTab> {
+class SMPlayersTabState extends State<SMPlayersTab> {
   String selectedPosition = 'Tous les postes';
   String searchQuery = '';
 
@@ -22,14 +22,16 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
   @override
   void initState() {
     super.initState();
-    _fetchPlayers();
+    fetchPlayers();
   }
 
-  Future<void> _fetchPlayers() async {
+  Future<void> fetchPlayers() async {
     final response = await Supabase.instance.client
         .from('joueur_sm')
-        .select('*, stats_joueur_sm(*)');
+        .select('*, stats_joueur_sm(*)')
+        .eq('user_id', Supabase.instance.client.auth.currentUser!.id);
 
+    print(response);
     final data = response as List<dynamic>;
 
     setState(() {
@@ -57,12 +59,12 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
         final stats = statsRow != null
             ? StatsJoueurSm(
                 id: statsRow['id'],
-                joueurId: statsRow['joueurId'],
+                joueurId: statsRow['joueur_id'],
                 marquage: statsRow['marquage'],
                 deplacement: statsRow['deplacement'],
-                frappesLointaines: statsRow['frappesLointaines'],
-                passesLongues: statsRow['passesLongues'],
-                coupsFrancs: statsRow['coupsFrancs'],
+                frappesLointaines: statsRow['frappes_lointaines'],
+                passesLongues: statsRow['passes_longues'],
+                coupsFrancs: statsRow['coups_francs'],
                 tacles: statsRow['tacles'],
                 finition: statsRow['finition'],
                 centres: statsRow['centres'],
@@ -73,13 +75,13 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
                 controle: statsRow['controle'],
                 penalties: statsRow['penalties'],
                 creativite: statsRow['creativite'],
-                stabiliteAerienne: statsRow['stabiliteAerienne'],
+                stabiliteAerienne: statsRow['stabilite_aerienne'],
                 vitesse: statsRow['vitesse'],
                 endurance: statsRow['endurance'],
                 force: statsRow['force'],
-                distanceParcourue: statsRow['distanceParcourue'],
+                distanceParcourue: statsRow['distance_parcourue'],
                 agressivite: statsRow['agressivite'],
-                sangFroid: statsRow['sangFroid'],
+                sangFroid: statsRow['sang_froid'],
                 concentration: statsRow['concentration'],
                 flair: statsRow['flair'],
                 leadership: statsRow['leadership'],
@@ -129,48 +131,6 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
       isLoading = false;
     });
   }
-
-  // final List<Map<String, dynamic>> players = [
-  //   {
-  //     'name': 'Vitinha',
-  //     'position': ['MDC', 'MC', 'MOC'],
-  //     'age': 25,
-  //     'rating': 91,
-  //     'potentiel': 94,
-  //     'value': '€70M',
-  //     'status': 'Titulaire',
-  //     'stats': {
-  //         //Technique 
-  //         'marquage': 70,
-  //         'deplacement': 82,
-  //         'frappes Lointaines': 82,
-  //         'passesLongues': 85,
-  //         'coupsFrancs': 70,
-  //         'tacles': 70,
-  //         'finition': 75,
-  //         'centres': 75,
-  //         'passes': 95,
-  //         'corners': 75,
-  //         'positionnement': 82,
-  //         'dribble': 95,
-  //         'controle': 88,
-  //         'penalties': 65,
-  //         'creativite': 81,
-  //         // Physique
-  //         'stabilite Aerienne': 64,
-  //         'vitesse': 95,
-  //         'endurance': 88,
-  //         'force': 65,
-  //         'distance Parcourue': 76,
-  //         //Mental
-  //         'agressivite': 65,
-  //         'sangFroid': 95,
-  //         'concentration': 82,
-  //         'flair': 81,
-  //         'leadership': 85,
-  //     },
-  //   },
-  // ];
 
   @override
   Widget build(BuildContext context) {
@@ -357,29 +317,41 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
                               _formKey.currentState!.save();
 
                               // ✅ insertion dans Supabase avec plusieurs postes
-                              final response = await Supabase.instance.client.from('joueur_sm').insert({
-                                'nom': nom,
-                                'age': age,
-                                'postes': postesSelectionnes.map((p) => p.name).toList(), // plusieurs postes
-                                'niveau_actuel': niveauActuel,
-                                'potentiel': potentiel,
-                                'montant_transfert': montantTransfert,
-                                'status': status.name,
-                                'duree_contrat': dureeContrat,
-                                'salaire': salaire,
-                                'user_id': Supabase.instance.client.auth.currentUser!.id,
-                              }).select().single();
+                              final response = await Supabase.instance.client
+                                .from('joueur_sm')
+                                .insert({
+                                  'nom': nom,
+                                  'age': age,
+                                  'postes': postesSelectionnes.map((p) => p.name).toList(),
+                                  'niveau_actuel': niveauActuel,
+                                  'potentiel': potentiel,
+                                  'montant_transfert': montantTransfert,
+                                  'status': status.name,
+                                  'duree_contrat': dureeContrat,
+                                  'salaire': salaire,
+                                  'user_id': Supabase.instance.client.auth.currentUser!.id,
+                                })
+                                .select('id')
+                                .single();
 
-                              final joueurId = response['id'];
+                              final joueurId = response['id'] != null ? response['id'] as int : null;
+
+                              if (joueurId == null) {
+                                print("Erreur: impossible de récupérer l'ID du joueur");
+                                return;
+                              }
+
+                              final userId = Supabase.instance.client.auth.currentUser!.id;
 
                               // insérer des stats par défaut
                               await Supabase.instance.client.from('stats_joueur_sm').insert({
-                                'joueurId': joueurId,
+                                'user_id': userId,
+                                'joueur_id': joueurId,
                                 'marquage': 50,
                                 'deplacement': 50,
-                                'frappesLointaines': 50,
-                                'passesLongues': 50,
-                                'coupsFrancs': 50,
+                                'frappes_lointaines': 50,
+                                'passes_longues': 50,
+                                'coups_francs': 50,
                                 'tacles': 50,
                                 'finition': 50,
                                 'centres': 50,
@@ -390,13 +362,13 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
                                 'controle': 50,
                                 'penalties': 50,
                                 'creativite': 50,
-                                'stabiliteAerienne': 50,
+                                'stabilite_aerienne': 50,
                                 'vitesse': 50,
                                 'endurance': 50,
                                 'force': 50,
-                                'distanceParcourue': 50,
+                                'distance_parcourue': 50,
                                 'agressivite': 50,
-                                'sangFroid': 50,
+                                'sang_froid': 50,
                                 'concentration': 50,
                                 'flair': 50,
                                 'leadership': 50,
@@ -404,7 +376,7 @@ class _SMPlayersTabState extends State<SMPlayersTab> {
 
                               if (mounted) {
                                 Navigator.pop(context);
-                                _fetchPlayers(); // rafraîchit la liste
+                                fetchPlayers(); // rafraîchit la liste
                               }
                             }
                           },

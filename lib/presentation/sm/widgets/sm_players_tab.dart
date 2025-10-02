@@ -89,21 +89,24 @@ class SMPlayersTabState extends State<SMPlayersTab> {
             : null;
 
         return {
+          'id': joueur.id,
           'name': joueur.nom,
           'position': joueur.postes.map((e) => e.name).toList(),
           'age': joueur.age,
           'rating': joueur.niveauActuel,
           'potentiel': joueur.potentiel,
           'value': '€${joueur.montantTransfert}M',
+          'montant_transfert': joueur.montantTransfert,
           'duree_contrat': joueur.dureeContrat.toString(),
+          'salaire': joueur.salaire,
           'status': joueur.status.name,
           'stats': stats != null
               ? {
                   'marquage': stats.marquage,
                   'deplacement': stats.deplacement,
-                  'frappes Lointaines': stats.frappesLointaines,
-                  'passesLongues': stats.passesLongues,
-                  'coupsFrancs': stats.coupsFrancs,
+                  'frappes_lointaines': stats.frappesLointaines,
+                  'passes_longues': stats.passesLongues,
+                  'coups_francs': stats.coupsFrancs,
                   'tacles': stats.tacles,
                   'finition': stats.finition,
                   'centres': stats.centres,
@@ -114,13 +117,13 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                   'controle': stats.controle,
                   'penalties': stats.penalties,
                   'creativite': stats.creativite,
-                  'stabilite Aerienne': stats.stabiliteAerienne,
+                  'stabilite_aerienne': stats.stabiliteAerienne,
                   'vitesse': stats.vitesse,
                   'endurance': stats.endurance,
                   'force': stats.force,
-                  'distance Parcourue': stats.distanceParcourue,
+                  'distance_parcourue': stats.distanceParcourue,
                   'agressivite': stats.agressivite,
-                  'sangFroid': stats.sangFroid,
+                  'sang_froid': stats.sangFroid,
                   'concentration': stats.concentration,
                   'flair': stats.flair,
                   'leadership': stats.leadership,
@@ -205,7 +208,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                     Text("Ajouter un joueur", style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 16),
 
-                    // Nom
                     TextFormField(
                       decoration: const InputDecoration(labelText: "Nom"),
                       validator: (value) {
@@ -216,7 +218,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                     ),
                     const SizedBox(height: 12),
 
-                    // Âge
                     TextFormField(
                       decoration: const InputDecoration(labelText: "Âge"),
                       keyboardType: TextInputType.number,
@@ -231,7 +232,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                     ),
                     const SizedBox(height: 12),
 
-                    // MultiSelect pour plusieurs postes
                    MultiSelectDialogField<PosteEnum>(
                       items: PosteEnum.values
                           .map((p) => MultiSelectItem<PosteEnum>(p, p.name))
@@ -278,7 +278,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                       },
                     ),
 
-                    // Niveau actuel
                     TextFormField(
                       decoration: const InputDecoration(labelText: "Niveau actuel"),
                       keyboardType: TextInputType.number,
@@ -293,7 +292,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                     ),
                     const SizedBox(height: 12),
 
-                    // Potentiel
                     TextFormField(
                       decoration: const InputDecoration(labelText: "Potentiel"),
                       keyboardType: TextInputType.number,
@@ -308,7 +306,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                     ),
                     const SizedBox(height: 12),
                     
-                    // Duree contrat
                     TextFormField(
                       decoration: const InputDecoration(labelText: "Fin de contrat"),
                       keyboardType: TextInputType.number,
@@ -317,7 +314,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                     ),
                     const SizedBox(height: 12),
 
-                    // Salaire
                     TextFormField(
                       decoration: const InputDecoration(labelText: "Salaire"),
                       keyboardType: TextInputType.number,
@@ -326,7 +322,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                     ),
                     const SizedBox(height: 12),
 
-                    // Statut
                     DropdownButtonFormField<StatusEnum>(
                       value: status,
                       decoration: const InputDecoration(labelText: "Statut"),
@@ -337,7 +332,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                     ),
                     const SizedBox(height: 16),
 
-                    // btn action (annuler, ajouter )
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -481,7 +475,7 @@ class SMPlayersTabState extends State<SMPlayersTab> {
 
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 315, // largeur max par carte
+        maxCrossAxisExtent: 315,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
         childAspectRatio: 2.5,
@@ -614,196 +608,13 @@ class SMPlayersTabState extends State<SMPlayersTab> {
   void _showPlayerDetails(BuildContext context, Map<String, dynamic> player) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.8,
-          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
-          child: Column(
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      player['name'],
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-              ),
-              // Content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Player overview
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 40,
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            child: Text(
-                              player['name'][0],
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 24),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  player['status'],
-                                  style: Theme.of(context).textTheme.titleMedium,
-                                ),
-                                Text(
-                                  "Contrat jusqu'à ${player['duree_contrat']}",
-                                  style: Theme.of(context).textTheme.titleMedium,
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                      decoration: BoxDecoration(
-                                        color: _getPositionColor((player['position'] as List<String>).first).withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        (player['position'] as List).join("/"),
-                                        style: TextStyle(
-                                          color: _getPositionColor((player['position'] as List).first), // prends la première pour la couleur
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Text('${player['age']} ans'),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                      decoration: BoxDecoration(
-                                        color: _getRatingColor(player['rating']).withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        player['rating'].toString(),
-                                        style: TextStyle(
-                                          color: _getRatingColor(player['rating']),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                      decoration: BoxDecoration(
-                                        color: _getRatingColor(player['potentiel']).withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        player['potentiel'].toString(),
-                                        style: TextStyle(
-                                          color: _getRatingColor(player['potentiel']),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Text(player['value']),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      // Statistics
-                      Text(
-                        'Statistiques détaillées',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 16),
-                      // Technique
-                      _buildStatsCard(
-                        context,
-                        "Technique",
-                        _filterStats(player['stats'], [
-                          'marquage', 'deplacement', 'frappes Lointaines', 'passesLongues',
-                          'coupsFrancs', 'tacles', 'finition', 'centres', 'passes', 'corners',
-                          'positionnement', 'dribble', 'controle', 'penalties', 'creativite',
-                        ]),
-                      ),
-                      const SizedBox(height: 16),
-                      // Physique
-                      _buildStatsCard(
-                        context,
-                        "Physique",
-                        _filterStats(player['stats'], [
-                          'stabilite Aerienne', 'vitesse', 'endurance', 'force', 'distance Parcourue',
-                        ]),
-                      ),
-                      const SizedBox(height: 16),
-                      // Mental
-                      _buildStatsCard(
-                        context,
-                        "Mental",
-                        _filterStats(player['stats'], [
-                          'agressivite', 'sangFroid', 'concentration', 'flair', 'leadership',
-                        ]),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // Actions
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Modification de ${player['name']}')),
-                          );
-                        },
-                        icon: const Icon(Icons.edit),
-                        label: const Text('Modifier'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+      builder: (context) => _PlayerDetailsDialog(
+        player: player,
+        onPlayerUpdated: () => fetchPlayers(),
+        getRatingColor: _getRatingColor,
+        getPositionColor: _getPositionColor,
+        filterStats: _filterStats,
+        buildStatsCard: _buildStatsCard,
       ),
     );
   }
@@ -811,16 +622,25 @@ class SMPlayersTabState extends State<SMPlayersTab> {
   Color _getPositionColor(String position) {
     switch (position) {
       case 'ATT':
+      case 'BU':
+      case 'MOD':
+      case 'MOG':
         return Colors.red;
       case 'MIL':
       case 'MC':
       case 'MDC':
       case 'MOC':
+      case 'MD':
+      case 'MG':
         return Colors.green;
       case 'DEF':
       case 'DC':
       case 'DL':
       case 'DR':
+      case 'DG':
+      case 'DD':
+      case 'DOG':
+      case 'DOD':
         return Colors.blue;
       case 'GK':
         return Colors.orange;
@@ -848,7 +668,6 @@ class SMPlayersTabState extends State<SMPlayersTab> {
           children: [
             Text(title, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
-            // Table pour 3 stats par ligne
             Table(
               columnWidths: const {
                 0: FlexColumnWidth(1),
@@ -883,12 +702,529 @@ class SMPlayersTabState extends State<SMPlayersTab> {
                           ),
                         );
                       } else {
-                        // Case vide pour compléter la ligne si moins de 3 stats
                         return const SizedBox();
                       }
                     }),
                   );
                 },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+}
+
+class _PlayerDetailsDialog extends StatefulWidget {
+  final Map<String, dynamic> player;
+  final VoidCallback onPlayerUpdated;
+  final Color Function(int) getRatingColor;
+  final Color Function(String) getPositionColor;
+  final Map<String, int> Function(Map<String, int>, List<String>) filterStats;
+  final Widget Function(BuildContext, String, Map<String, int>) buildStatsCard;
+
+  const _PlayerDetailsDialog({
+    required this.player,
+    required this.onPlayerUpdated,
+    required this.getRatingColor,
+    required this.getPositionColor,
+    required this.filterStats,
+    required this.buildStatsCard,
+  });
+
+  @override
+  State<_PlayerDetailsDialog> createState() => _PlayerDetailsDialogState();
+}
+
+class _PlayerDetailsDialogState extends State<_PlayerDetailsDialog> {
+  bool isEditing = false;
+  late TextEditingController nameController;
+  late TextEditingController ageController;
+  late TextEditingController ratingController;
+  late TextEditingController potentielController;
+  late TextEditingController valueController;
+  late TextEditingController dureeContratController;
+  late TextEditingController salaireController;
+  late String selectedStatus;
+  List<PosteEnum> selectedPostes = [];
+  late Map<String, TextEditingController> statsControllers;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
+    nameController = TextEditingController(text: widget.player['name']);
+    ageController = TextEditingController(text: widget.player['age'].toString());
+    ratingController = TextEditingController(text: widget.player['rating'].toString());
+    potentielController = TextEditingController(text: widget.player['potentiel'].toString());
+    valueController = TextEditingController(text: widget.player['montant_transfert'].toString());
+    dureeContratController = TextEditingController(text: widget.player['duree_contrat'].toString());
+    salaireController = TextEditingController(text: widget.player['salaire'].toString());
+    selectedStatus = widget.player['status'];
+    selectedPostes = (widget.player['position'] as List<dynamic>)
+        .map((p) => PosteEnum.values.firstWhere((e) => e.name == p))
+        .toList();
+    statsControllers = {};
+    (widget.player['stats'] as Map<String, dynamic>).forEach((key, value) {
+      statsControllers[key] = TextEditingController(text: value.toString());
+    });
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    ageController.dispose();
+    ratingController.dispose();
+    potentielController.dispose();
+    valueController.dispose();
+    dureeContratController.dispose();
+    salaireController.dispose();
+    for (final c in statsControllers.values) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _saveChanges() async {
+    try {
+      final updatedStats = <String, int>{};
+      statsControllers.forEach((key, controller) {
+        updatedStats[key] = int.tryParse(controller.text) ?? 0;
+      });
+
+      // 1️⃣ Mise à jour joueur_sm
+      await Supabase.instance.client
+          .from('joueur_sm')
+          .update({
+            'nom': nameController.text,
+            'age': int.parse(ageController.text),
+            'postes': selectedPostes.map((p) => p.name).toList(),
+            'niveau_actuel': int.parse(ratingController.text),
+            'potentiel': int.parse(potentielController.text),
+            'montant_transfert': int.parse(valueController.text),
+            'status': selectedStatus,
+            'duree_contrat': int.parse(dureeContratController.text),
+            'salaire': int.parse(salaireController.text),
+          })
+          .eq('id', widget.player['id']);
+
+      // 2️⃣ Mise à jour stats_joueur_sm
+      await Supabase.instance.client
+          .from('stats_joueur_sm')
+          .update(updatedStats)
+          .eq('joueur_id', widget.player['id']); // ⚠️ colonne FK joueur_id supposée
+
+      // 3️⃣ UI + feedback
+      setState(() {
+        isEditing = false;
+      });
+
+      widget.onPlayerUpdated();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${nameController.text} a été mis à jour')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors de la mise à jour: $e')),
+        );
+      }
+    }
+  }
+
+  void _cancelEdit() {
+    setState(() {
+      isEditing = false;
+      _initializeControllers();
+    });
+  }
+
+  Widget buildEditableStatsCard(
+    BuildContext context,
+    String title,
+    Map<String, int> stats,
+  ) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 16,
+              runSpacing: 12,
+              children: stats.entries.map((entry) {
+                final key = entry.key;
+                return SizedBox(
+                  width: 150,
+                  child: isEditing
+                      ? TextField(
+                          controller: statsControllers[key],
+                          decoration: InputDecoration(
+                            labelText: key,
+                            border: const OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                        )
+                      : Column(
+                          children: [
+                            Text(key, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text(entry.value.toString()),
+                          ],
+                        ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.8,
+        constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: isEditing
+                        ? TextField(
+                            controller: nameController,
+                            style: Theme.of(context).textTheme.headlineMedium,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Nom',
+                            ),
+                          )
+                        : Text(
+                            widget.player['name'],
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          child: Text(
+                            widget.player['name'][0],
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 24),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              isEditing
+                                  ? DropdownButtonFormField<String>(
+                                      value: selectedStatus,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Statut',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      items: StatusEnum.values
+                                          .map((s) => DropdownMenuItem(
+                                                value: s.name,
+                                                child: Text(s.name),
+                                              ))
+                                          .toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedStatus = value!;
+                                        });
+                                      },
+                                    )
+                                  : Text(
+                                      widget.player['status'],
+                                      style: Theme.of(context).textTheme.titleMedium,
+                                    ),
+                              const SizedBox(height: 4),
+                              isEditing
+                                  ? TextField(
+                                      controller: dureeContratController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Fin de contrat',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                    )
+                                  : Text(
+                                      "Contrat jusqu'à ${widget.player['duree_contrat']}",
+                                      style: Theme.of(context).textTheme.titleMedium,
+                                    ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  if (isEditing)
+                                    Expanded(
+                                      child: MultiSelectDialogField<PosteEnum>(
+                                        items: PosteEnum.values
+                                            .map((p) => MultiSelectItem<PosteEnum>(p, p.name))
+                                            .toList(),
+                                        title: Text(
+                                          "Postes",
+                                          style: TextStyle(
+                                            color: Theme.of(context).brightness == Brightness.dark
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                        buttonText: Text(
+                                          selectedPostes.map((e) => e.name).join("/"),
+                                          style: TextStyle(
+                                            color: Theme.of(context).brightness == Brightness.dark
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                        initialValue: selectedPostes,
+                                        itemsTextStyle: TextStyle(
+                                          color: Theme.of(context).brightness == Brightness.dark
+                                              ? Colors.white
+                                              : Colors.black,
+                                        ),
+                                        confirmText: Text(
+                                          "OK",
+                                          style: TextStyle(
+                                            color: Theme.of(context).brightness == Brightness.dark
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                        cancelText: Text(
+                                          "Annuler",
+                                          style: TextStyle(
+                                            color: Theme.of(context).brightness == Brightness.dark
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                        onConfirm: (values) {
+                                          setState(() {
+                                            selectedPostes = values;
+                                          });
+                                        },
+                                      ),
+                                    )
+                                  else
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: widget.getPositionColor((widget.player['position'] as List<String>).first).withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        (widget.player['position'] as List).join("/"),
+                                        style: TextStyle(
+                                          color: widget.getPositionColor((widget.player['position'] as List).first),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(width: 12),
+                                  if (isEditing)
+                                    SizedBox(
+                                      width: 80,
+                                      child: TextField(
+                                        controller: ageController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Âge',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        keyboardType: TextInputType.number,
+                                      ),
+                                    )
+                                  else
+                                    Text('${widget.player['age']} ans'),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  if (isEditing)
+                                    SizedBox(
+                                      width: 80,
+                                      child: TextField(
+                                        controller: ratingController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Note',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        keyboardType: TextInputType.number,
+                                      ),
+                                    )
+                                  else
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: widget.getRatingColor(widget.player['rating']).withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        widget.player['rating'].toString(),
+                                        style: TextStyle(
+                                          color: widget.getRatingColor(widget.player['rating']),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(width: 8),
+                                  if (isEditing)
+                                    SizedBox(
+                                      width: 80,
+                                      child: TextField(
+                                        controller: potentielController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Pot.',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        keyboardType: TextInputType.number,
+                                      ),
+                                    )
+                                  else
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: widget.getRatingColor(widget.player['potentiel']).withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        widget.player['potentiel'].toString(),
+                                        style: TextStyle(
+                                          color: widget.getRatingColor(widget.player['potentiel']),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(width: 12),
+                                  if (isEditing)
+                                    SizedBox(
+                                      width: 100,
+                                      child: TextField(
+                                        controller: valueController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Val. (M€)',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        keyboardType: TextInputType.number,
+                                      ),
+                                    )
+                                  else
+                                    Text(widget.player['value']),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      'Statistiques détaillées',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    buildEditableStatsCard(
+                      context,
+                      "Technique",
+                      widget.filterStats(widget.player['stats'], [
+                        'marquage', 'deplacement', 'frappes_lointaines', 'passes_longues',
+                        'coups_francs', 'tacles', 'finition', 'centres', 'passes', 'corners',
+                        'positionnement', 'dribble', 'controle', 'penalties', 'creativite',
+                      ]),
+                    ),
+                    const SizedBox(height: 16),
+                    buildEditableStatsCard(
+                      context,
+                      "Physique",
+                      widget.filterStats(widget.player['stats'], [
+                        'stabilite_aerienne', 'vitesse', 'endurance', 'force', 'distance_parcourue',
+                      ]),
+                    ),
+                    const SizedBox(height: 16),
+                    buildEditableStatsCard(
+                      context,
+                      "Mental",
+                      widget.filterStats(widget.player['stats'], [
+                        'agressivite', 'sang_froid', 'concentration', 'flair', 'leadership',
+                      ]),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+              ),
+              child: Row(
+                children: [
+                  if (isEditing)
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _cancelEdit,
+                        child: const Text('Annuler'),
+                      ),
+                    ),
+                  if (isEditing) const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: isEditing
+                          ? _saveChanges
+                          : () {
+                              setState(() {
+                                isEditing = true;
+                              });
+                            },
+                      icon: Icon(isEditing ? Icons.save : Icons.edit),
+                      label: Text(isEditing ? 'Enregistrer' : 'Modifier'),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

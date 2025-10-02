@@ -840,6 +840,40 @@ class _PlayerDetailsDialogState extends State<_PlayerDetailsDialog> {
     }
   }
 
+  Future<void> _deletePlayer() async {
+    try {
+      final playerId = widget.player['id'];
+
+      // Supprimer d'abord les stats liées
+      await Supabase.instance.client
+          .from('stats_joueur_sm')
+          .delete()
+          .eq('joueur_id', playerId);
+
+      // Puis supprimer le joueur
+      await Supabase.instance.client
+          .from('joueur_sm')
+          .delete()
+          .eq('id', playerId);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${widget.player['nom']} a été supprimé')),
+        );
+      }
+
+      widget.onPlayerUpdated(); // callback pour rafraîchir la liste
+      Navigator.pop(context);   // on ferme la page courante (ex: fiche joueur)
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors de la suppression : $e')),
+        );
+      }
+    }
+  }
+
+
   void _cancelEdit() {
     setState(() {
       isEditing = false;
@@ -1224,6 +1258,15 @@ class _PlayerDetailsDialogState extends State<_PlayerDetailsDialog> {
                       label: Text(isEditing ? 'Enregistrer' : 'Modifier'),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _deletePlayer,
+                      icon: Icon(Icons.delete),
+                      label: Text('Supprimer'),
+                    ),
+                  )
+
                 ],
               ),
             ),

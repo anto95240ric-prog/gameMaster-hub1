@@ -4,7 +4,7 @@ class JoueurSm {
   final int id;
   final String nom;
   final int age;
-  final PosteEnum poste;
+  final List<PosteEnum> postes; // plusieurs postes possibles
   final int niveauActuel;
   final int potentiel;
   final int montantTransfert;
@@ -17,7 +17,7 @@ class JoueurSm {
     required this.id,
     required this.nom,
     required this.age,
-    required this.poste,
+    required this.postes,
     required this.niveauActuel,
     required this.potentiel,
     required this.montantTransfert,

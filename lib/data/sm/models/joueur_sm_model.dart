@@ -5,7 +5,7 @@ class JoueurSmModel {
   final int id;
   final String nom;
   final int age;
-  final PosteEnum poste;
+  final List<PosteEnum> postes;
   final int niveauActuel;
   final int potentiel;
   final int montantTransfert;
@@ -18,7 +18,7 @@ class JoueurSmModel {
     required this.id,
     required this.nom,
     required this.age,
-    required this.poste,
+    required this.postes,
     required this.niveauActuel,
     required this.potentiel,
     required this.montantTransfert,
@@ -34,7 +34,7 @@ class JoueurSmModel {
       id: id,
       nom: nom,
       age: age,
-      poste: poste,
+      postes: postes,
       niveauActuel: niveauActuel,
       potentiel: potentiel,
       montantTransfert: montantTransfert,
@@ -51,7 +51,7 @@ class JoueurSmModel {
       id: joueur.id,
       nom: joueur.nom,
       age: joueur.age,
-      poste: joueur.poste,
+      postes: joueur.postes,
       niveauActuel: joueur.niveauActuel,
       potentiel: joueur.potentiel,
       montantTransfert: joueur.montantTransfert,

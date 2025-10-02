@@ -24,7 +24,7 @@ class JoueurSmRepositoryImpl implements JoueurSmRepository {
         id: -1,
         nom: 'Inconnu',
         age: 0,
-        poste: PosteEnum.GK,
+        postes: [PosteEnum.GK],
         niveauActuel: 0,
         potentiel: 0,
         montantTransfert: 0,

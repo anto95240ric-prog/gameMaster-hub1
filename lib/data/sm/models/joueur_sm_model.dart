@@ -61,4 +61,40 @@ class JoueurSmModel {
       userId: joueur.userId,
     );
   }
+
+  /// 🔹 Conversion depuis une Map (Supabase)
+  factory JoueurSmModel.fromMap(Map<String, dynamic> map) {
+    return JoueurSmModel(
+      id: map['id'],
+      nom: map['nom'],
+      age: map['age'],
+      postes: (map['postes'] as List<dynamic>)
+          .map((p) => PosteEnum.values.firstWhere((e) => e.name == p))
+          .toList(),
+      niveauActuel: map['niveau_actuel'],
+      potentiel: map['potentiel'],
+      montantTransfert: map['montant_transfert'],
+      status: StatusEnum.values.firstWhere((e) => e.name == map['status']),
+      dureeContrat: map['duree_contrat'],
+      salaire: map['salaire'],
+      userId: map['user_id'],
+    );
+  }
+
+  /// 🔹 Conversion vers une Map (Supabase)
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'nom': nom,
+      'age': age,
+      'postes': postes.map((p) => p.name).toList(),
+      'niveau_actuel': niveauActuel,
+      'potentiel': potentiel,
+      'montant_transfert': montantTransfert,
+      'status': status.name,
+      'duree_contrat': dureeContrat,
+      'salaire': salaire,
+      'user_id': userId,
+    };
+  }
 }

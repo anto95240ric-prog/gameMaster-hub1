@@ -50,3 +50,12 @@ class FilterJoueursSmEvent extends JoueursSmEvent {
   @override
   List<Object?> get props => [position, searchQuery];
 }
+
+class SortJoueursSmEvent extends JoueursSmEvent {
+  final String sortField;
+
+  const SortJoueursSmEvent(this.sortField);
+
+  @override
+  List<Object?> get props => [sortField];
+}

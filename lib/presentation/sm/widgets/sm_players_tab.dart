@@ -31,18 +31,36 @@ class SMPlayersTab extends StatelessWidget {
             ),
           );
         } else if (state is JoueursSmLoaded) {
-          return Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(context, state),
-                const SizedBox(height: 24),
-                _buildFilters(context, state),
-                const SizedBox(height: 24),
-                Expanded(child: _buildPlayersGrid(context, state)),
-              ],
-            ),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+
+              return Stack(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(context, state),
+                        const SizedBox(height: 24),
+                        _buildFilters(context, state),
+                        const SizedBox(height: 24),
+                        Expanded(child: _buildPlayersGrid(context, state)),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 16,
+                    right: 16,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showAddPlayerDialog(context),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Ajouter'),
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         }
         return const Center(child: Text('État inconnu'));
@@ -58,12 +76,12 @@ class SMPlayersTab extends StatelessWidget {
 
     final filteredPlayers = state.filteredJoueurs;
     final totalPlayers = filteredPlayers.length;
-    final averageRating = totalPlayers > 0
+    final averageNiveauActuel = totalPlayers > 0
         ? filteredPlayers
-                .map((p) => p.averageRating)
+                .map((p) => p.joueur.niveauActuel)
                 .reduce((a, b) => a + b) /
             totalPlayers
-        : 0.0;
+        : 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,65 +95,70 @@ class SMPlayersTab extends StatelessWidget {
                 style: titleStyle,
               ),
             ),
-            ElevatedButton.icon(
-                onPressed: () => _showAddPlayerDialog(context),
-                icon: const Icon(Icons.add),
-                label: const Text('Ajouter'),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
               ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatCard(
+                    context,
+                    'Joueurs',
+                    totalPlayers.toString(),
+                    Icons.people,
+                  ),
+                  const SizedBox(width: 30),
+                  _buildStatCard(
+                    context,
+                    'Note',
+                    averageNiveauActuel.toStringAsFixed(0),
+                    Icons.star,
+                  ),
+                ],
+              ),
+            ),
           ],
-        ),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatCard(
-                context,
-                'Joueurs',
-                totalPlayers.toString(),
-                Icons.people,
-              ),
-              _buildStatCard(
-                context,
-                'Note moyenne',
-                averageRating.toStringAsFixed(1),
-                Icons.star,
-              ),
-            ],
-          ),
         ),
       ],
     );
   }
 
   Widget _buildStatCard(BuildContext context, String label, String value, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 24),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+              Text(
+                value,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
+
 
   void _showAddPlayerDialog(BuildContext context) {
     showDialog(
@@ -145,10 +168,12 @@ class SMPlayersTab extends StatelessWidget {
   }
 
   Widget _buildFilters(BuildContext context, JoueursSmLoaded state) {
+   
     return Column(
       children: [
         Row(
           children: [
+          // 🔹 Filtre position
             Expanded(
               child: DropdownButtonFormField<String>(
                 value: state.selectedPosition,
@@ -173,6 +198,8 @@ class SMPlayersTab extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
+
+            // 🔹 Filtre recherche
             Expanded(
               child: TextField(
                 decoration: const InputDecoration(
@@ -190,57 +217,99 @@ class SMPlayersTab extends StatelessWidget {
                 },
               ),
             ),
+            const SizedBox(width: 16),
+            // SingleChildScrollView(
+            //   scrollDirection: Axis.horizontal,
+            //   child: Row(
+            //     children: [
+            //       const Text('Trier par: '),
+            //       const SizedBox(width: 8),
+            //       ..._buildSortButtons(context, state),
+            //     ],
+            //   ),
+            // ),
+
+            // 🔹 Tri (dropdown au lieu de chips)
+            Expanded(
+              child: _buildSortControls(context, state),
+            ),
           ],
-        ),
-        const SizedBox(height: 12),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              const Text('Trier par: '),
-              const SizedBox(width: 8),
-              ..._buildSortButtons(context, state),
-            ],
-          ),
-        ),
+        ),        
       ],
     );
   }
 
-  List<Widget> _buildSortButtons(BuildContext context, JoueursSmLoaded state) {
-    final sortOptions = ['Nom', 'Note', 'Âge', 'Potentiel', 'Transfert', 'Salaire'];
-    final sortFieldMap = {
-      'Nom': SortField.name,
-      'Note': SortField.rating,
-      'Âge': SortField.age,
-      'Potentiel': SortField.potential,
-      'Transfert': SortField.transferValue,
-      'Salaire': SortField.salary,
-    };
+  Widget _buildSortControls(BuildContext context, JoueursSmLoaded state) {
+    final List<String> sortOptions = ['Nom', 'Note', 'Âge', 'Potentiel', 'Transfert', 'Salaire'];
 
-    return sortOptions.map((option) {
-      final isSelected = state.sortField != null && sortFieldMap[option] == state.sortField;
-      return Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: FilterChip(
-          label: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(option),
-              if (isSelected)
-                Icon(
-                  state.sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                  size: 16,
-                ),
-            ],
+    // Fonction pour convertir SortField -> String
+    String sortFieldToString(SortField? field) {
+      switch (field) {
+        case SortField.name:
+          return 'Nom';
+        case SortField.rating:
+          return 'Note';
+        case SortField.age:
+          return 'Âge';
+        case SortField.potential:
+          return 'Potentiel';
+        case SortField.transferValue:
+          return 'Transfert';
+        case SortField.salary:
+          return 'Salaire';
+        default:
+          return 'Nom';
+      }
+    }
+
+    return Row(
+      children: [
+        // 🔹 Dropdown pour choisir le champ de tri
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            value: sortFieldToString(state.sortField),
+            decoration: const InputDecoration(
+              labelText: 'Trier par',
+              border: OutlineInputBorder(),
+            ),
+            items: sortOptions
+                .map<DropdownMenuItem<String>>(
+                  (option) => DropdownMenuItem<String>(
+                    value: option,
+                    child: Text(option),
+                  ),
+                )
+                .toList(),
+            onChanged: (String? value) {
+              if (value != null) {
+                context.read<JoueursSmBloc>().add(
+                      SortJoueursSmEvent(
+                        sortField: value,
+                        ascending: state.sortAscending,
+                      ),
+                    );
+              }
+            },
           ),
-          selected: isSelected,
-          onSelected: (_) {
-            context.read<JoueursSmBloc>().add(SortJoueursSmEvent(option));
+        ),
+        const SizedBox(width: 12),
+
+        // 🔹 Bouton pour basculer asc/desc
+        IconButton(
+          icon: Icon(
+            state.sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+          ),
+          onPressed: () {
+            context.read<JoueursSmBloc>().add(
+                  SortJoueursSmEvent(
+                    sortField: sortFieldToString(state.sortField),
+                    ascending: !state.sortAscending,
+                  ),
+                );
           },
         ),
-      );
-    }).toList();
+      ],
+    );
   }
 
   Widget _buildPlayersGrid(BuildContext context, JoueursSmLoaded state) {

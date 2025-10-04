@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamemaster_hub/presentation/sm/blocs/joueurs/joueurs_sm_bloc.dart';
+import 'package:gamemaster_hub/presentation/sm/blocs/joueurs/joueurs_sm_state.dart';
 import 'package:go_router/go_router.dart';
 
 import '../blocs/auth/auth_bloc.dart';
@@ -52,8 +54,6 @@ class HomeScreen extends StatelessWidget {
             _buildWelcomeSection(context),
             const SizedBox(height: 48),
             _buildGamesGrid(context),
-            const SizedBox(height: 48),
-            _buildRecentActivity(context),
           ],
         ),
       ),
@@ -78,112 +78,79 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGamesGrid(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 800 ? 3 : 1;
-        return GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 24,
-          mainAxisSpacing: 24,
-          childAspectRatio: 1.2,
-          children: [
-            GameCard(
-              title: 'Soccer Manager',
-              description: 'Optimiseur de tactique et suivi des joueurs',
-              icon: Icons.sports_soccer,
-              priority: 1,
-              stats: const {'Joueurs': '23', 'Note équipe': '87'},
-              onTap: () => context.go('/sm'),
-            ),
-            GameCard(
-              title: 'Football Manager',
-              description: 'Gestion avancée et analyse détaillée',
-              icon: Icons.stadium,
-              priority: 2,
-              stats: const {'Joueurs': '45', 'Note équipe': '92'},
-              onTap: () => context.go('/fm'),
-            ),
-            GameCard(
-              title: 'Star Wars GoH',
-              description: 'Optimiseur d\'équipe et simulateur',
-              icon: Icons.rocket_launch,
-              priority: 3,
-              stats: const {'Personnages': '156', 'Puissance': '4.2M'},
-              onTap: () => context.go('/swgoh'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+ Widget _buildGamesGrid(BuildContext context) {
+  return BlocBuilder<JoueursSmBloc, JoueursSmState>(
+    builder: (context, state) {
+      int totalPlayersSM = 0;
+      double averageRatingSM = 0;
 
-  Widget _buildRecentActivity(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Activité récente',
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
-        const SizedBox(height: 24),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: 3,
-          separatorBuilder: (context, index) => const SizedBox(height: 16),
-          itemBuilder: (context, index) {
-            final activities = [
-              {
-                'icon': Icons.psychology,
-                'title': 'Tactique optimisée',
-                'description': 'Formation 4-3-3 recommandée pour Soccer Manager',
-                'time': 'Il y a 2h',
-              },
-              {
-                'icon': Icons.trending_up,
-                'title': 'Progression joueur',
-                'description': 'Anderson a gagné +3 points',
-                'time': 'Il y a 5h',
-              },
-              {
-                'icon': Icons.sync,
-                'title': 'Synchronisation',
-                'description': 'Données mises à jour avec succès',
-                'time': 'Il y a 1j',
-              },
-            ];
+      int totalPlayersFM = 0;
+      double averageRatingFM = 0;
 
-            final activity = activities[index];
-            return Card(
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: Icon(
-                    activity['icon'] as IconData,
-                    color: Colors.white,
-                  ),
-                ),
-                title: Text(activity['title'] as String),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(activity['description'] as String),
-                    const SizedBox(height: 4),
-                    Text(
-                      activity['time'] as String,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-                contentPadding: const EdgeInsets.all(16),
+      // Si l'état est chargé, on calcule les stats dynamiquement
+      if (state is JoueursSmLoaded) {
+        final filteredPlayers = state.filteredJoueurs;
+        totalPlayersSM = filteredPlayers.length;
+        averageRatingSM = totalPlayersSM > 0
+            ? filteredPlayers
+                    .map((p) => p.joueur.niveauActuel)
+                    .reduce((a, b) => a + b) /
+                totalPlayersSM
+            : 0;
+
+        // Pour FM ou autres jeux, tu pourrais faire la même logique avec d'autres BLoC
+        // Ici on met juste des valeurs fictives
+        totalPlayersFM = 45;
+        averageRatingFM = 92;
+      }
+
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final crossAxisCount = constraints.maxWidth > 800 ? 3 : 1;
+          return GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 24,
+            mainAxisSpacing: 24,
+            childAspectRatio: 1.2,
+            children: [
+              GameCard(
+                title: 'Soccer Manager',
+                description: 'Optimiseur de tactique et suivi des joueurs',
+                icon: Icons.sports_soccer,
+                priority: 1,
+                stats: {
+                  'Joueurs': '$totalPlayersSM',
+                  'Note équipe': averageRatingSM.toStringAsFixed(0),
+                },
+                onTap: () => context.go('/sm'),
               ),
-            );
-          },
-        ),
-      ],
-    );
-  }
+              GameCard(
+                title: 'Football Manager',
+                description: 'Gestion avancée et analyse détaillée',
+                icon: Icons.stadium,
+                priority: 2,
+                stats: {
+                  'Joueurs': '$totalPlayersFM',
+                  'Note équipe': averageRatingFM.toStringAsFixed(0),
+                },
+                onTap: () => context.go('/fm'),
+              ),
+              GameCard(
+                title: 'Star Wars GoH',
+                description: 'Optimiseur d\'équipe et simulateur',
+                icon: Icons.rocket_launch,
+                priority: 3,
+                stats: const {'Personnages': '156', 'Puissance': '4.2M'},
+                onTap: () => context.go('/swgoh'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
 }

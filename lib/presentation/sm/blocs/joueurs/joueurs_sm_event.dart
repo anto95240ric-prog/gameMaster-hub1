@@ -50,3 +50,16 @@ class FilterJoueursSmEvent extends JoueursSmEvent {
   @override
   List<Object?> get props => [position, searchQuery];
 }
+
+class SortJoueursSmEvent extends JoueursSmEvent {
+  final String sortField; // le champ sur lequel trier
+  final bool ascending;   // true = ascendant, false = descendant
+
+  const SortJoueursSmEvent({
+    required this.sortField,
+    this.ascending = true, // par défaut ascendant
+  });
+
+  @override
+  List<Object?> get props => [sortField, ascending];
+}

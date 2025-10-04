@@ -17,6 +17,7 @@ class JoueursSmBloc extends Bloc<JoueursSmEvent, JoueursSmState> {
     on<UpdateJoueurSmEvent>(_onUpdateJoueur);
     on<DeleteJoueurSmEvent>(_onDeleteJoueur);
     on<FilterJoueursSmEvent>(_onFilterJoueurs);
+    on<SortJoueursSmEvent>(_onSortJoueurs);
   }
 
   Future<void> _onLoadJoueurs(
@@ -120,6 +121,51 @@ class JoueursSmBloc extends Bloc<JoueursSmEvent, JoueursSmState> {
       emit(currentState.copyWith(
         selectedPosition: event.position,
         searchQuery: event.searchQuery,
+      ));
+    }
+  }
+
+  Future<void> _onSortJoueurs(
+    SortJoueursSmEvent event,
+    Emitter<JoueursSmState> emit,
+  ) async {
+    if (state is JoueursSmLoaded) {
+      final currentState = state as JoueursSmLoaded;
+      SortField? sortField;
+      bool sortAscending = currentState.sortAscending;
+
+      switch (event.sortField) {
+        case 'Nom':
+          sortField = SortField.name;
+          break;
+        case 'Note':
+          sortField = SortField.rating;
+          break;
+        case 'Âge':
+          sortField = SortField.age;
+          break;
+        case 'Potentiel':
+          sortField = SortField.potential;
+          break;
+        case 'Transfert':
+          sortField = SortField.transferValue;
+          break;
+        case 'Salaire':
+          sortField = SortField.salary;
+          break;
+        default:
+          sortField = currentState.sortField ?? SortField.name;
+      }
+
+      if (sortField == currentState.sortField) {
+        sortAscending = !sortAscending;
+      } else {
+        sortAscending = true;
+      }
+
+      emit(currentState.copyWith(
+        sortField: sortField,
+        sortAscending: sortAscending,
       ));
     }
   }

@@ -318,112 +318,197 @@ class _PlayerDetailsDialogState extends State<PlayerDetailsDialog> {
   }
 
   Widget _buildEditableFields(BuildContext context, JoueurSm joueur) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (isEditing)
-          TextField(
-            controller: dureeContratController,
-            decoration: const InputDecoration(
-              labelText: 'Fin de contrat',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
-          )
-        else
-          Text(
-            "Contrat jusqu'à ${joueur.dureeContrat}",
-            style: Theme.of(context).textTheme.titleMedium,
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      if (isEditing)
+        TextField(
+          controller: dureeContratController,
+          decoration: const InputDecoration(
+            labelText: 'Fin de contrat',
+            border: OutlineInputBorder(),
           ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            if (isEditing)
-              Expanded(
-                child: MultiSelectDialogField<PosteEnum>(
-                  items: PosteEnum.values
-                      .map((p) => MultiSelectItem<PosteEnum>(p, p.name))
-                      .toList(),
-                  title: Text(
-                    "Postes",
-                    style: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                  ),
-                  buttonText: Text(
-                    selectedPostes.map((e) => e.name).join("/"),
-                    style: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                  ),
-                  initialValue: selectedPostes,
-                  itemsTextStyle: TextStyle(
+          keyboardType: TextInputType.number,
+        )
+      else
+        Text(
+          "Contrat jusqu'à ${joueur.dureeContrat}",
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+
+      const SizedBox(height: 8),
+
+      Row(
+        children: [
+          if (isEditing)
+            Expanded(
+              child: MultiSelectDialogField<PosteEnum>(
+                items: PosteEnum.values
+                    .map((p) => MultiSelectItem<PosteEnum>(p, p.name))
+                    .toList(),
+                title: Text(
+                  "Postes",
+                  style: TextStyle(
                     color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white
                         : Colors.black,
                   ),
-                  confirmText: Text(
-                    "OK",
-                    style: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                  ),
-                  cancelText: Text(
-                    "Annuler",
-                    style: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                  ),
-                  onConfirm: (values) {
-                    setState(() {
-                      selectedPostes = values;
-                    });
-                  },
                 ),
-              )
-            else
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _getPositionColor(joueur.postes.first.name).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  joueur.postes.map((e) => e.name).join("/"),
+                buttonText: Text(
+                  selectedPostes.map((e) => e.name).join("/"),
                   style: TextStyle(
-                    color: _getPositionColor(joueur.postes.first.name),
-                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
                   ),
+                ),
+                initialValue: selectedPostes,
+                itemsTextStyle: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
+                confirmText: Text(
+                  "OK",
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                  ),
+                ),
+                cancelText: Text(
+                  "Annuler",
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                  ),
+                ),
+                onConfirm: (values) {
+                  setState(() {
+                    selectedPostes = values;
+                  });
+                },
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: _getPositionColor(joueur.postes.first.name).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                joueur.postes.map((e) => e.name).join("/"),
+                style: TextStyle(
+                  color: _getPositionColor(joueur.postes.first.name),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            const SizedBox(width: 12),
-            if (isEditing)
-              SizedBox(
-                width: 80,
-                child: TextField(
-                  controller: ageController,
-                  decoration: const InputDecoration(
-                    labelText: 'Âge',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
+            ),
+
+          const SizedBox(width: 12),
+
+          if (isEditing)
+            SizedBox(
+              width: 80,
+              child: TextField(
+                controller: ageController,
+                decoration: const InputDecoration(
+                  labelText: 'Âge',
+                  border: OutlineInputBorder(),
                 ),
-              )
-            else
-              Text('${joueur.age} ans'),
-          ],
-        ),
-      ],
-    );
-  }
+                keyboardType: TextInputType.number,
+              ),
+            )
+          else
+            Text('${joueur.age} ans'),
+        ],
+      ),
+
+      const SizedBox(height: 8),
+
+      Row(
+        children: [
+          if (isEditing)
+            SizedBox(
+              width: 80,
+              child: TextField(
+                controller: ratingController,
+                decoration: const InputDecoration(
+                  labelText: 'Note',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: _getRatingColor(joueur.niveauActuel).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                joueur.niveauActuel.toString(),
+                style: TextStyle(
+                  color: _getRatingColor(joueur.niveauActuel),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+          const SizedBox(width: 8),
+
+          if (isEditing)
+            SizedBox(
+              width: 80,
+              child: TextField(
+                controller: potentielController,
+                decoration: const InputDecoration(
+                  labelText: 'Pot.',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: _getProgressionColor(joueur.potentiel).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                joueur.potentiel.toString(),
+                style: TextStyle(
+                  color: _getProgressionColor(joueur.potentiel),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+          const SizedBox(width: 12),
+
+          if (isEditing)
+            SizedBox(
+              width: 100,
+              child: TextField(
+                controller: valueController,
+                decoration: const InputDecoration(
+                  labelText: 'Val. (M€)',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            )
+          else
+            Text("${joueur.montantTransfert} M€"),
+        ],
+      ),
+    ],
+  );
+}
 
   Widget _buildStatsSection(BuildContext context, String title, List<String> keys) {
     return Card(
@@ -538,5 +623,17 @@ class _PlayerDetailsDialogState extends State<PlayerDetailsDialog> {
       default:
         return Colors.grey;
     }
+  }
+
+    Color _getRatingColor(int rating) {
+    if (rating >= 85) return Colors.green;
+    if (rating >= 80) return Colors.blue;
+    return Colors.orange;
+  }
+
+  Color _getProgressionColor(int potentiel) {
+    if (potentiel > 0) return Colors.green;
+    if (potentiel < 0) return Colors.red;
+    return Colors.grey;
   }
 }

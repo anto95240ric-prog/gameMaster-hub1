@@ -159,7 +159,6 @@ class SMPlayersTab extends StatelessWidget {
     );
   }
 
-
   void _showAddPlayerDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -218,16 +217,6 @@ class SMPlayersTab extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
-            // SingleChildScrollView(
-            //   scrollDirection: Axis.horizontal,
-            //   child: Row(
-            //     children: [
-            //       const Text('Trier par: '),
-            //       const SizedBox(width: 8),
-            //       ..._buildSortButtons(context, state),
-            //     ],
-            //   ),
-            // ),
 
             // 🔹 Tri (dropdown au lieu de chips)
             Expanded(

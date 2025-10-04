@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamemaster_hub/presentation/sm/blocs/joueurs/joueurs_sm_event.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -44,6 +45,12 @@ void main() async {
       providers: [
         BlocProvider(create: (_) => ThemeBloc()),
         BlocProvider(create: (_) => AuthBloc()),
+        BlocProvider(
+        create: (_) => JoueursSmBloc(
+          joueurRepository: joueurRepository,
+          statsRepository: statsRepository,
+        )..add(LoadJoueursSmEvent()), // charge les joueurs dès le début
+      ),
       ],
       child: const GameMasterHubApp(),
     ),

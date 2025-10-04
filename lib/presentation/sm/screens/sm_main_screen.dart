@@ -38,76 +38,61 @@ class _SMMainScreenState extends State<SMMainScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        final supabase = Supabase.instance.client;
-        
-        final joueurDataSource = JoueurSmRemoteDataSourceImpl(supabase);
-        final statsDataSource = StatsJoueurSmRemoteDataSource(supabase);
-        final joueurRepository = JoueurSmRepositoryImpl(joueurDataSource);
-        final statsRepository = StatsJoueurSmRepositoryImpl(statsDataSource);
-
-        return JoueursSmBloc(
-          joueurRepository: joueurRepository,
-          statsRepository: statsRepository,
-        )..add(LoadJoueursSmEvent());
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            onPressed: () => context.go('/'),
-            icon: const Icon(Icons.arrow_back),
-          ),
-          title: const Row(
-            children: [
-              Icon(Icons.sports_soccer),
-              SizedBox(width: 8),
-              Text('Soccer Manager'),
-            ],
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                context.read<ThemeBloc>().add(ToggleTheme());
-              },
-              icon: BlocBuilder<ThemeBloc, ThemeState>(
-                builder: (context, state) {
-                  return Icon(
-                    state.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                  );
-                },
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                context.read<JoueursSmBloc>().add(LoadJoueursSmEvent());
-              },
-              icon: const Icon(Icons.sync),
-            ),
-            IconButton(
-              onPressed: () {
-                context.read<AuthBloc>().add(AuthSignOutRequested());
-                context.go('/auth');
-              },
-              icon: const Icon(Icons.account_circle),
-            ),
-          ],
-          bottom: TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(
-                icon: Icon(Icons.group),
-                text: 'Joueurs',
-              ),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => context.go('/'),
+          icon: const Icon(Icons.arrow_back),
         ),
-        body: TabBarView(
+        title: const Row(
+          children: [
+            Icon(Icons.sports_soccer),
+            SizedBox(width: 8),
+            Text('Soccer Manager'),
+          ],
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<ThemeBloc>().add(ToggleTheme());
+            },
+            icon: BlocBuilder<ThemeBloc, ThemeState>(
+              builder: (context, state) {
+                return Icon(
+                  state.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                );
+              },
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              context.read<JoueursSmBloc>().add(LoadJoueursSmEvent());
+            },
+            icon: const Icon(Icons.sync),
+          ),
+          IconButton(
+            onPressed: () {
+              context.read<AuthBloc>().add(AuthSignOutRequested());
+              context.go('/auth');
+            },
+            icon: const Icon(Icons.account_circle),
+          ),
+        ],
+        bottom: TabBar(
           controller: _tabController,
-          children: const [
-            SMPlayersTab(),
+          tabs: const [
+            Tab(
+              icon: Icon(Icons.group),
+              text: 'Joueurs',
+            ),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: const [
+          SMPlayersTab(),
+        ],
       ),
     );
   }

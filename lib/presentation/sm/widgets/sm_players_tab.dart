@@ -6,6 +6,7 @@ import 'package:gamemaster_hub/presentation/sm/blocs/joueurs/joueurs_sm_state.da
 import 'package:gamemaster_hub/presentation/sm/widgets/add_player_dialog.dart';
 import 'package:gamemaster_hub/presentation/sm/widgets/player_card_widget.dart';
 import 'package:gamemaster_hub/presentation/sm/widgets/player_details_dialog.dart';
+import 'package:gamemaster_hub/presentation/core/utils/responsive_layout.dart';
 
 class SMPlayersTab extends StatelessWidget {
   const SMPlayersTab({super.key});
@@ -33,30 +34,41 @@ class SMPlayersTab extends StatelessWidget {
         } else if (state is JoueursSmLoaded) {
           return LayoutBuilder(
             builder: (context, constraints) {
+              final screenType = ResponsiveLayout.getScreenTypeFromWidth(constraints.maxWidth);
+              final horizontalPadding = ResponsiveLayout.getHorizontalPadding(constraints.maxWidth);
+              final verticalPadding = ResponsiveLayout.getVerticalPadding(constraints.maxWidth);
 
               return Stack(
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
+                      vertical: verticalPadding,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildHeader(context, state),
-                        const SizedBox(height: 24),
-                        _buildFilters(context, state),
-                        const SizedBox(height: 24),
-                        Expanded(child: _buildPlayersGrid(context, state)),
+                        _buildHeader(context, state, constraints.maxWidth),
+                        SizedBox(height: screenType == ScreenType.mobile ? 16 : 24),
+                        _buildFilters(context, state, constraints.maxWidth),
+                        SizedBox(height: screenType == ScreenType.mobile ? 16 : 24),
+                        Expanded(child: _buildPlayersGrid(context, state, constraints.maxWidth)),
                       ],
                     ),
                   ),
                   Positioned(
                     bottom: 16,
                     right: 16,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _showAddPlayerDialog(context),
-                      icon: const Icon(Icons.add),
-                      label: const Text('Ajouter'),
-                    ),
+                    child: screenType == ScreenType.mobile
+                        ? FloatingActionButton(
+                            onPressed: () => _showAddPlayerDialog(context),
+                            child: const Icon(Icons.add),
+                          )
+                        : ElevatedButton.icon(
+                            onPressed: () => _showAddPlayerDialog(context),
+                            icon: const Icon(Icons.add),
+                            label: const Text('Ajouter'),
+                          ),
                   ),
                 ],
               );
@@ -68,10 +80,12 @@ class SMPlayersTab extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, JoueursSmLoaded state) {
-    final screenWidth = MediaQuery.of(context).size.width;
+  Widget _buildHeader(BuildContext context, JoueursSmLoaded state, double width) {
+    final screenType = ResponsiveLayout.getScreenTypeFromWidth(width);
+    final isMobile = screenType == ScreenType.mobile;
+
     final titleStyle = Theme.of(context).textTheme.displayMedium?.copyWith(
-          fontSize: screenWidth < 600 ? 20 : 32,
+          fontSize: isMobile ? 20 : (screenType == ScreenType.tablet ? 26 : 32),
         );
 
     final filteredPlayers = state.filteredJoueurs;
@@ -83,44 +97,76 @@ class SMPlayersTab extends StatelessWidget {
             totalPlayers
         : 0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Gestion des Joueurs',
+            style: titleStyle,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  'Joueurs',
+                  totalPlayers.toString(),
+                  Icons.people,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  'Note',
+                  averageNiveauActuel.toStringAsFixed(0),
+                  Icons.star,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                'Gestion des Joueurs',
-                style: titleStyle,
+        Expanded(
+          child: Text(
+            'Gestion des Joueurs',
+            style: titleStyle,
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: screenType == ScreenType.tablet ? 12 : 16,
+            vertical: 12,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildStatCard(
+                context,
+                'Joueurs',
+                totalPlayers.toString(),
+                Icons.people,
               ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12),
+              SizedBox(width: screenType == ScreenType.tablet ? 20 : 30),
+              _buildStatCard(
+                context,
+                'Note',
+                averageNiveauActuel.toStringAsFixed(0),
+                Icons.star,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStatCard(
-                    context,
-                    'Joueurs',
-                    totalPlayers.toString(),
-                    Icons.people,
-                  ),
-                  const SizedBox(width: 30),
-                  _buildStatCard(
-                    context,
-                    'Note',
-                    averageNiveauActuel.toStringAsFixed(0),
-                    Icons.star,
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -166,64 +212,114 @@ class SMPlayersTab extends StatelessWidget {
     );
   }
 
-  Widget _buildFilters(BuildContext context, JoueursSmLoaded state) {
-   
-    return Column(
+  Widget _buildFilters(BuildContext context, JoueursSmLoaded state, double width) {
+    final screenType = ResponsiveLayout.getScreenTypeFromWidth(width);
+    final isMobile = screenType == ScreenType.mobile;
+
+    if (isMobile) {
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: state.selectedPosition,
+                  decoration: const InputDecoration(
+                    labelText: 'Position',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: ['Tous les postes', 'Gardien', 'Défenseur', 'Milieu', 'Attaquant']
+                      .map((position) => DropdownMenuItem(
+                            value: position,
+                            child: Text(position),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    context.read<JoueursSmBloc>().add(
+                          FilterJoueursSmEvent(
+                            position: value!,
+                            searchQuery: state.searchQuery,
+                          ),
+                        );
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Rechercher...',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                  onChanged: (value) {
+                    context.read<JoueursSmBloc>().add(
+                          FilterJoueursSmEvent(
+                            position: state.selectedPosition,
+                            searchQuery: value,
+                          ),
+                        );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildSortControls(context, state),
+        ],
+      );
+    }
+
+    return Row(
       children: [
-        Row(
-          children: [
-          // 🔹 Filtre position
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: state.selectedPosition,
-                decoration: const InputDecoration(
-                  labelText: 'Position',
-                  border: OutlineInputBorder(),
-                ),
-                items: ['Tous les postes', 'Gardien', 'Défenseur', 'Milieu', 'Attaquant']
-                    .map((position) => DropdownMenuItem(
-                          value: position,
-                          child: Text(position),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  context.read<JoueursSmBloc>().add(
-                        FilterJoueursSmEvent(
-                          position: value!,
-                          searchQuery: state.searchQuery,
-                        ),
-                      );
-                },
-              ),
+        Expanded(
+          flex: screenType == ScreenType.tablet ? 2 : 1,
+          child: DropdownButtonFormField<String>(
+            value: state.selectedPosition,
+            decoration: const InputDecoration(
+              labelText: 'Position',
+              border: OutlineInputBorder(),
             ),
-            const SizedBox(width: 16),
-
-            // 🔹 Filtre recherche
-            Expanded(
-              child: TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Rechercher...',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.search),
-                ),
-                onChanged: (value) {
-                  context.read<JoueursSmBloc>().add(
-                        FilterJoueursSmEvent(
-                          position: state.selectedPosition,
-                          searchQuery: value,
-                        ),
-                      );
-                },
-              ),
+            items: ['Tous les postes', 'Gardien', 'Défenseur', 'Milieu', 'Attaquant']
+                .map((position) => DropdownMenuItem(
+                      value: position,
+                      child: Text(position),
+                    ))
+                .toList(),
+            onChanged: (value) {
+              context.read<JoueursSmBloc>().add(
+                    FilterJoueursSmEvent(
+                      position: value!,
+                      searchQuery: state.searchQuery,
+                    ),
+                  );
+            },
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          flex: screenType == ScreenType.tablet ? 3 : 2,
+          child: TextField(
+            decoration: const InputDecoration(
+              labelText: 'Rechercher...',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.search),
             ),
-            const SizedBox(width: 16),
-
-            // 🔹 Tri (dropdown au lieu de chips)
-            Expanded(
-              child: _buildSortControls(context, state),
-            ),
-          ],
-        ),        
+            onChanged: (value) {
+              context.read<JoueursSmBloc>().add(
+                    FilterJoueursSmEvent(
+                      position: state.selectedPosition,
+                      searchQuery: value,
+                    ),
+                  );
+            },
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          flex: screenType == ScreenType.tablet ? 2 : 1,
+          child: _buildSortControls(context, state),
+        ),
       ],
     );
   }
@@ -301,8 +397,9 @@ class SMPlayersTab extends StatelessWidget {
     );
   }
 
-  Widget _buildPlayersGrid(BuildContext context, JoueursSmLoaded state) {
+  Widget _buildPlayersGrid(BuildContext context, JoueursSmLoaded state, double width) {
     final filteredPlayers = state.filteredJoueurs;
+    final screenType = ResponsiveLayout.getScreenTypeFromWidth(width);
 
     if (filteredPlayers.isEmpty) {
       return const Center(
@@ -310,12 +407,38 @@ class SMPlayersTab extends StatelessWidget {
       );
     }
 
+    int crossAxisCount;
+    double childAspectRatio;
+    double crossAxisSpacing;
+    double mainAxisSpacing;
+
+    switch (screenType) {
+      case ScreenType.mobile:
+        crossAxisCount = 1;
+        childAspectRatio = 3.5;
+        crossAxisSpacing = 12;
+        mainAxisSpacing = 12;
+        break;
+      case ScreenType.tablet:
+        crossAxisCount = 2;
+        childAspectRatio = 3.0;
+        crossAxisSpacing = 16;
+        mainAxisSpacing = 16;
+        break;
+      case ScreenType.desktop:
+        crossAxisCount = ResponsiveLayout.getCrossAxisCount(width);
+        childAspectRatio = 2.5;
+        crossAxisSpacing = 16;
+        mainAxisSpacing = 16;
+        break;
+    }
+
     return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 315,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 2.5,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: crossAxisSpacing,
+        mainAxisSpacing: mainAxisSpacing,
+        childAspectRatio: childAspectRatio,
       ),
       itemCount: filteredPlayers.length,
       itemBuilder: (context, index) {

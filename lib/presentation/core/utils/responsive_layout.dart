@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 enum ScreenType { mobile, tablet, desktop }
 
 class ResponsiveLayout {
-  static const double mobileBreakpoint = 600;
-  static const double tabletBreakpoint = 1024;
+  static const double mobileBreakpoint = 500;
+  static const double tabletBreakpoint = 724;
 
   static ScreenType getScreenType(BuildContext context) {
     return getScreenTypeFromWidth(MediaQuery.of(context).size.width);
@@ -46,7 +46,7 @@ class ResponsiveLayout {
     if (width < mobileBreakpoint) {
       return 16;
     } else if (width < tabletBreakpoint) {
-      return 24;
+      return 20;
     } else {
       return 32;
     }
@@ -56,7 +56,7 @@ class ResponsiveLayout {
     if (width < mobileBreakpoint) {
       return 16;
     } else if (width < tabletBreakpoint) {
-      return 24;
+      return 20;
     } else {
       return 32;
     }

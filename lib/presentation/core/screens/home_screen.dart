@@ -122,40 +122,48 @@ class HomeScreen extends StatelessWidget {
           averageRatingFM = 92;
         }
 
-        final screenType = ResponsiveLayout.getScreenTypeFromWidth(width);
+        const double maxCardWidth = 420;
+
         int crossAxisCount;
         double crossAxisSpacing;
         double mainAxisSpacing;
-        double childAspectRatio;
 
-        switch (screenType) {
-          case ScreenType.mobile:
-            crossAxisCount = 1;
-            crossAxisSpacing = 16;
-            mainAxisSpacing = 16;
-            childAspectRatio = 1.3;
-            break;
-          case ScreenType.tablet:
-            crossAxisCount = 2;
-            crossAxisSpacing = 20;
-            mainAxisSpacing = 20;
-            childAspectRatio = 1.2;
-            break;
-          case ScreenType.desktop:
-            crossAxisCount = 3;
-            crossAxisSpacing = 24;
-            mainAxisSpacing = 24;
-            childAspectRatio = 1.2;
-            break;
+        if (width < ResponsiveLayout.mobileBreakpoint) {
+          crossAxisCount = 1;
+          crossAxisSpacing = 16;
+          mainAxisSpacing = 16;
+        } else if (width < ResponsiveLayout.tabletBreakpoint) {
+          crossAxisCount = 2;
+          crossAxisSpacing = 20;
+          mainAxisSpacing = 20;
+        } else if (width < 1200) {
+          crossAxisCount = 3;
+          crossAxisSpacing = 24;
+          mainAxisSpacing = 24;
+        } else {
+          crossAxisCount = 3;
+          crossAxisSpacing = 32;
+          mainAxisSpacing = 32;
         }
 
-        return GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: crossAxisSpacing,
-          mainAxisSpacing: mainAxisSpacing,
-          childAspectRatio: childAspectRatio,
+        final horizontalPadding = ResponsiveLayout.getHorizontalPadding(width);
+        final availableWidth = width - (horizontalPadding * 2) - (crossAxisSpacing * (crossAxisCount - 1));
+        final cardWidth = availableWidth / crossAxisCount;
+        final constrainedCardWidth = cardWidth > maxCardWidth ? maxCardWidth : cardWidth;
+        final cardHeight = constrainedCardWidth * 1.3;
+
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: (maxCardWidth * crossAxisCount) + (crossAxisSpacing * (crossAxisCount - 1)),
+            ),
+            child: GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: crossAxisSpacing,
+              mainAxisSpacing: mainAxisSpacing,
+              childAspectRatio: constrainedCardWidth / cardHeight,
           children: [
             GameCard(
               title: 'Soccer Manager',
@@ -188,6 +196,8 @@ class HomeScreen extends StatelessWidget {
               onTap: () => context.go('/swgoh'),
             ),
           ],
+            ),
+          ),
         );
       },
     );

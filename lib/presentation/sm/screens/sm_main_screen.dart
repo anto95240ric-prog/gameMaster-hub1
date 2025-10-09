@@ -1,18 +1,13 @@
-// lib/presentation/sm/screens/sm_main_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/sm_players_tab.dart';
 import '../../core/blocs/auth/auth_bloc.dart';
 import '../../core/blocs/theme/theme_bloc.dart';
 import '../blocs/joueurs/joueurs_sm_bloc.dart';
 import '../blocs/joueurs/joueurs_sm_event.dart';
-import '../../../data/sm/repositories/joueur_sm_repository_impl.dart';
-import '../../../data/sm/repositories/stats_joueur_sm_repository_impl.dart';
-import '../../../data/sm/datasources/joueur_sm_remote_data_source.dart';
-import '../../../data/sm/datasources/stats_joueur_sm_remote_data_source.dart';
 import '../../core/utils/responsive_layout.dart';
+import '../../../main.dart'; // 👈 pour accéder à globalSaveId
 
 class SMMainScreen extends StatefulWidget {
   const SMMainScreen({super.key});
@@ -41,13 +36,20 @@ class _SMMainScreenState extends State<SMMainScreen>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final screenType = ResponsiveLayout.getScreenTypeFromWidth(constraints.maxWidth);
+        final screenType =
+            ResponsiveLayout.getScreenTypeFromWidth(constraints.maxWidth);
         final isMobile = screenType == ScreenType.mobile;
+        double screenWidth = constraints.maxWidth;
+        double fontSize = screenWidth < 400
+                    ? 14
+                    : screenWidth < 600
+                        ? 16
+                        : 18;
 
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
-              onPressed: () => context.go('/'),
+              onPressed: () => context.go('/saves'),
               icon: const Icon(Icons.arrow_back),
             ),
             title: isMobile
@@ -67,18 +69,21 @@ class _SMMainScreenState extends State<SMMainScreen>
                 icon: BlocBuilder<ThemeBloc, ThemeState>(
                   builder: (context, state) {
                     return Icon(
-                      state.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                      state.isDarkMode
+                          ? Icons.light_mode
+                          : Icons.dark_mode,
                     );
                   },
                 ),
               ),
-              if (!isMobile)
-                IconButton(
-                  onPressed: () {
-                    context.read<JoueursSmBloc>().add(LoadJoueursSmEvent());
-                  },
-                  icon: const Icon(Icons.sync),
-                ),
+              IconButton(
+                onPressed: () {
+                  context
+                      .read<JoueursSmBloc>()
+                      .add(LoadJoueursSmEvent(globalSaveId)); // 👈 ici
+                },
+                icon: const Icon(Icons.sync),
+              ),
               IconButton(
                 onPressed: () {
                   context.read<AuthBloc>().add(AuthSignOutRequested());
@@ -87,26 +92,25 @@ class _SMMainScreenState extends State<SMMainScreen>
                 icon: const Icon(Icons.account_circle),
               ),
             ],
-            bottom: isMobile
-                ? null
-                : TabBar(
-                    controller: _tabController,
-                    tabs: const [
-                      Tab(
-                        icon: Icon(Icons.group),
-                        text: 'Joueurs',
-                      ),
-                    ],
-                  ),
-          ),
-          body: isMobile
-              ? const SMPlayersTab()
-              : TabBarView(
-                  controller: _tabController,
-                  children: const [
-                    SMPlayersTab(),
-                  ],
+            bottom: TabBar(
+              controller: _tabController,
+              labelStyle: TextStyle(
+                fontSize: fontSize,
+              ),
+              tabs: const [
+                Tab(
+                  icon: Icon(Icons.group),
+                  text: 'Joueurs',
                 ),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            controller: _tabController,
+            children: const [
+              SMPlayersTab(),
+            ],
+          ),
         );
       },
     );

@@ -23,18 +23,41 @@ class HomeScreen extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: isMobile
-                ? const Icon(Icons.sports_esports)
-                : Row(
-                    children: [
-                      Icon(
-                        Icons.sports_esports,
-                        color: Theme.of(context).colorScheme.primary,
+            title: LayoutBuilder(
+              builder: (context, constraints) {
+                double screenWidth = constraints.maxWidth;
+                double fontSize;
+
+                if (screenWidth < 400) {
+                  fontSize = 16; 
+                } else if (screenWidth < 600) {
+                  fontSize = 18;
+                } else if (screenWidth < 900) {
+                  fontSize = 20;
+                } else {
+                  fontSize = 24;
+                }
+
+                return Row(
+                  children: [
+                    Image.asset(
+                      'assets/images/logo.png',
+                      height: 48,
+                      width: 48,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'GameMaster Hub',
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(width: 8),
-                      const Text('GameMaster Hub'),
-                    ],
-                  ),
+                    ),
+                  ],
+                );
+              },
+            ),
             actions: [
               IconButton(
                 onPressed: () {
@@ -77,13 +100,15 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildWelcomeSection(BuildContext context, ScreenType screenType) {
     final isMobile = screenType == ScreenType.mobile;
+    final isTablet = screenType == ScreenType.tablet;
+    final isLaptop = screenType == ScreenType.laptop;
 
     return Column(
       children: [
         Text(
           'Bienvenue dans GameMaster Hub',
           style: Theme.of(context).textTheme.displayLarge?.copyWith(
-            fontSize: isMobile ? 28 : (screenType == ScreenType.tablet ? 36 : 48),
+            fontSize: isMobile ? 28 : (isTablet ? 36 : (isLaptop ? 42 : 48)),
           ),
           textAlign: TextAlign.center,
         ),
@@ -91,7 +116,7 @@ class HomeScreen extends StatelessWidget {
         Text(
           'Choisissez votre jeu et optimisez vos performances',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontSize: isMobile ? 14 : (screenType == ScreenType.tablet ? 16 : 18),
+            fontSize: isMobile ? 14 : (isTablet ? 16 : 18),
           ),
           textAlign: TextAlign.center,
         ),
@@ -105,8 +130,8 @@ class HomeScreen extends StatelessWidget {
         int totalPlayersSM = 0;
         double averageRatingSM = 0;
 
-        int totalPlayersFM = 0;
-        double averageRatingFM = 0;
+        // int totalPlayersFM = 0;
+        // double averageRatingFM = 0;
 
         if (state is JoueursSmLoaded) {
           final filteredPlayers = state.filteredJoueurs;
@@ -118,89 +143,84 @@ class HomeScreen extends StatelessWidget {
                   totalPlayersSM
               : 0;
 
-          totalPlayersFM = 45;
-          averageRatingFM = 92;
+          // totalPlayersFM = 45;
+          // averageRatingFM = 92;
         }
 
-        const double maxCardWidth = 420;
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final screenType = ResponsiveLayout.getScreenTypeFromWidth(constraints.maxWidth);
+            final cardConstraints = ResponsiveLayout.getGameCardConstraints(screenType);
+            final spacing = screenType == ScreenType.mobile ? 16.0 : 24.0;
 
-        int crossAxisCount;
-        double crossAxisSpacing;
-        double mainAxisSpacing;
+            // Calcul du nombre de colonnes optimal (max 3 pour les game cards)
+            final crossAxisCount = ResponsiveLayout.calculateOptimalColumns(
+              availableWidth: constraints.maxWidth,
+              constraints: cardConstraints,
+              spacing: spacing,
+              maxColumns: 3,
+            );
 
-        if (width < ResponsiveLayout.mobileBreakpoint) {
-          crossAxisCount = 1;
-          crossAxisSpacing = 16;
-          mainAxisSpacing = 16;
-        } else if (width < ResponsiveLayout.tabletBreakpoint) {
-          crossAxisCount = 2;
-          crossAxisSpacing = 20;
-          mainAxisSpacing = 20;
-        } else if (width < 1200) {
-          crossAxisCount = 3;
-          crossAxisSpacing = 24;
-          mainAxisSpacing = 24;
-        } else {
-          crossAxisCount = 3;
-          crossAxisSpacing = 32;
-          mainAxisSpacing = 32;
-        }
+            // Calcul de la largeur effective pour chaque carte
+            final totalSpacing = spacing * (crossAxisCount - 1);
+            final availableForCards = constraints.maxWidth - totalSpacing;
+            final cardWidth = cardConstraints.clampWidth(availableForCards / crossAxisCount);
 
-        final horizontalPadding = ResponsiveLayout.getHorizontalPadding(width);
-        final availableWidth = width - (horizontalPadding * 2) - (crossAxisSpacing * (crossAxisCount - 1));
-        final cardWidth = availableWidth / crossAxisCount;
-        final constrainedCardWidth = cardWidth > maxCardWidth ? maxCardWidth : cardWidth;
-        final cardHeight = constrainedCardWidth * 1.3;
-
-        return Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: (maxCardWidth * crossAxisCount) + (crossAxisSpacing * (crossAxisCount - 1)),
-            ),
-            child: GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: crossAxisSpacing,
-              mainAxisSpacing: mainAxisSpacing,
-              childAspectRatio: constrainedCardWidth / cardHeight,
-          children: [
-            GameCard(
-              title: 'Soccer Manager',
-              description: 'Optimiseur de tactique et suivi des joueurs',
-              icon: Icons.sports_soccer,
-              priority: 1,
-              stats: {
-                'Joueurs': '$totalPlayersSM',
-                'Note équipe': averageRatingSM.toStringAsFixed(0),
-              },
-              onTap: () => context.go('/sm'),
-            ),
-            GameCard(
-              title: 'Football Manager',
-              description: 'Gestion avancée et analyse détaillée',
-              icon: Icons.stadium,
-              priority: 2,
-              stats: {
-                'Joueurs': '$totalPlayersFM',
-                'Note équipe': averageRatingFM.toStringAsFixed(0),
-              },
-              onTap: () => context.go('/fm'),
-            ),
-            GameCard(
-              title: 'Star Wars GoH',
-              description: 'Optimiseur d\'équipe et simulateur',
-              icon: Icons.rocket_launch,
-              priority: 3,
-              stats: const {'Personnages': '156', 'Puissance': '4.2M'},
-              onTap: () => context.go('/swgoh'),
-            ),
-          ],
-            ),
-          ),
+            return Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              alignment: WrapAlignment.center,
+              children: [
+                SizedBox(
+                  width: cardWidth,
+                  child: GameCard(
+                    title: 'Soccer Manager',
+                    description: 'Gestion et analyse minimaliste',
+                    icon: Icons.sports_soccer,
+                    priority: 1,
+                    screenType: screenType,
+                    cardWidth: cardWidth,
+                    stats: {
+                      'Joueurs': '$totalPlayersSM',
+                      'Note équipe': averageRatingSM.toStringAsFixed(0),
+                    },
+                    onTap: () => context.go('/sm'),
+                  ),
+                ),
+                // SizedBox(
+                //   width: cardWidth,
+                //   child: GameCard(
+                //     title: 'Football Manager',
+                //     description: 'Gestion avancée et analyse détaillée',
+                //     icon: Icons.stadium,
+                //     priority: 2,
+                //     screenType: screenType,
+                //     cardWidth: cardWidth,
+                //     stats: {
+                //       'Joueurs': '$totalPlayersFM',
+                //       'Note équipe': averageRatingFM.toStringAsFixed(0),
+                //     },
+                //     onTap: () => context.go('/fm'),
+                //   ),
+                // ),
+                // SizedBox(
+                //   width: cardWidth,
+                //   child: GameCard(
+                //     title: 'SWGOH',
+                //     description: 'Optimiseur d\'équipe et simulateur',
+                //     icon: Icons.rocket_launch,
+                //     priority: 3,
+                //     screenType: screenType,
+                //     cardWidth: cardWidth,
+                //     stats: const {'Personnages': '156', 'Puissance': '4.2M'},
+                //     onTap: () => context.go('/swgoh'),
+                //   ),
+                // ),
+              ],
+            );
+          },
         );
       },
     );
   }
-
 }
